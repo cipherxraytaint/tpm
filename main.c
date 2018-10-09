@@ -40,7 +40,6 @@ int main(int argc, char const *argv[])
         printTime("Finish building TPM");
         // print_tpm_source(tpm);
 
-        tpmBufCtxt = initTPMBufContext(tpm);    // For HitMap usage
 #if TPM_RE_TRANSITON
         // disp_tpm_buf_source(tpm, tpmBufCtxt, 89);
 #endif
@@ -49,6 +48,10 @@ int main(int argc, char const *argv[])
         // benchTPMDFS(tpm);
 #endif
 
+        tpmBufCtxt = initTPMBufContext(tpm);    // For HitMap usage
+
+        /* Change the design, no need to build HitMap any more */
+        /*
         hitMap = buildHitMap(tpm, tpmBufCtxt);   // TODO: flag forward or reverse build
         print_hitmap_source(hitMap);
 
@@ -82,6 +85,7 @@ int main(int argc, char const *argv[])
         delHitMapBufContext(hitMap->hitMapBufCtxt);
         delHitMap(hitMap);
 
+        */
         // searchAllAvalancheInTPM(tpm);
         delTPM(tpm);
       }
