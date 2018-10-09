@@ -39,6 +39,9 @@
 #define mem2NodeHashSize	90000
 #define seqNo2NodeHashSize	120000000
 
+// Need to adjust based on stats of XTaint log
+#define NUM_TPMSrcNode      1024    // num of tpm source nodes (seqN < 0)
+
 struct Mem2NodeHT;
 
 struct Transition
@@ -108,6 +111,25 @@ seqNo2NodeSearch(struct TPMContext *tpm, u32 seqNo);
 
 void
 delTPM(struct TPMContext *tpm);
+
+/*
+ * Iterates each memory node.
+ *
+ * Returns:
+ *  array of TPM source nodes (seqN < 0)
+ *   each elet is a TPM source node
+ *
+ *  @numTPMSrcNode
+ *   num of TPM source nodes
+ */
+TPMNode2 *
+getTPMSrcNode(TPMBufContext *tpmBufCtxt, u32 *numTPMSrcNode);
+
+/*
+ * Free the dynamic array created by getTPMSrcNode
+ */
+void
+delTPMSrcNode(TPMNode2 **aryTPMSrcNode);
 
 /* Transition operation */
 TPMNode *
