@@ -54,9 +54,6 @@ int main(int argc, char const *argv[])
         TPMNode2 **tpmSrcNode;
 
         tpmSrcNode = getTPMSrcNode(tpmBufCtxt, &numTPMSrcNode);
-        for(int i = 0; i < numTPMSrcNode; i++) {
-          printMemNodeLit(tpmSrcNode[i]);
-        }
         delTPMSrcNode(tpmSrcNode);
 
         /* Change the design, no need to build HitMap any more */
