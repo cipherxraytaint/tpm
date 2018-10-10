@@ -122,7 +122,7 @@ delTPM(struct TPMContext *tpm);
  *  @numTPMSrcNode
  *   num of TPM source nodes
  */
-TPMNode2 *
+TPMNode2 **
 getTPMSrcNode(TPMBufContext *tpmBufCtxt, u32 *numTPMSrcNode);
 
 /*

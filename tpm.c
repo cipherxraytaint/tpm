@@ -436,16 +436,14 @@ void delTPM(struct TPMContext *tpm)
   // - free TPMBufHashTable
 }
 
-TPMNode2 *
+TPMNode2 **
 getTPMSrcNode(TPMBufContext *tpmBufCtxt, u32 *numTPMSrcNode)
 {
   *numTPMSrcNode = 0;
   TPMBufHashTable *buf = tpmBufCtxt->tpmBufHash;
 
-  TPMNode2 **aryTPMSrcNode = NULL;
-
-  *aryTPMSrcNode = calloc(NUM_TPMSrcNode, sizeof(TPMNode2 *) );
-  assert(*aryTPMSrcNode != NULL);
+  TPMNode2 **tpmSrcNode = calloc(NUM_TPMSrcNode, sizeof(TPMNode2 *) );
+  assert(tpmSrcNode != NULL);
 
   for(; buf != NULL; buf = buf->hh_tpmBufHT.next) {
     TPMNode2 *addrHead = buf->headNode;
@@ -457,7 +455,7 @@ getTPMSrcNode(TPMBufContext *tpmBufCtxt, u32 *numTPMSrcNode)
       do {
         if(verHead->lastUpdateTS < 0) {
           // printMemNodeLit(verHead);
-          aryTPMSrcNode[*numTPMSrcNode] = verHead;
+          tpmSrcNode[*numTPMSrcNode] = verHead;
           (*numTPMSrcNode)++;
         }
         verHead = verHead->nextVersion;
@@ -471,15 +469,14 @@ getTPMSrcNode(TPMBufContext *tpmBufCtxt, u32 *numTPMSrcNode)
 //  for(int i = 0; i < *numTPMSrcNode; i++) {
 //    printMemNodeLit(aryTPMSrcNode[i]);
 //  }
-  return *aryTPMSrcNode;
+  return tpmSrcNode;
 }
 
 void
 delTPMSrcNode(TPMNode2 **aryTPMSrcNode)
 {
-  if(*aryTPMSrcNode != NULL) {
-    free(*aryTPMSrcNode);
-    *aryTPMSrcNode = NULL;
+  if(aryTPMSrcNode != NULL) {
+    free(aryTPMSrcNode);
     printf("del array of TPM source nodes\n");
   }
 }

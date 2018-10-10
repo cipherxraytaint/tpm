@@ -51,13 +51,14 @@ int main(int argc, char const *argv[])
         tpmBufCtxt = initTPMBufContext(tpm);    // For HitMap usage
 
         u32 numTPMSrcNode = 0;
-        TPMNode2 **aryTPMSrcNode;
+        TPMNode2 **tpmSrcNode;
 
-        aryTPMSrcNode = getTPMSrcNode(tpmBufCtxt, &numTPMSrcNode);
-        for(int i = 0; i < *numTPMSrcNode; i++) {
-          printMemNodeLit(aryTPMSrcNode[i]);
+        tpmSrcNode = getTPMSrcNode(tpmBufCtxt, &numTPMSrcNode);
+        for(int i = 0; i < numTPMSrcNode; i++) {
+          printMemNodeLit(tpmSrcNode[i]);
         }
-        delTPMSrcNode(&aryTPMSrcNode);
+        delTPMSrcNode(tpmSrcNode);
+
         /* Change the design, no need to build HitMap any more */
         /*
         hitMap = buildHitMap(tpm, tpmBufCtxt);   // TODO: flag forward or reverse build
