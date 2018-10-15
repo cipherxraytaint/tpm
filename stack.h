@@ -26,9 +26,13 @@ typedef struct Stack_
 Stack   *stackNew(void);
 void    stackDel(Stack *stack);
 
-size_t  stackSize(Stack *stack);
-bool    stackEmpty(Stack *stack);
-void    *stackPeek(Stack *stack);
+size_t      stackSize(Stack *stack);
+bool        stackEmpty(Stack *stack);
+
+void        *stackPeek(Stack *stack);
+StackElet   *stackTop(Stack *stack);
+StackElet   *stackNextElet(StackElet *stackElet);
+void        *stackGetElet(StackElet *stackElet);
 
 void    stackPush(Stack *stack, void *elet);
 void    *stackPop(Stack *stack);

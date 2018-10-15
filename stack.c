@@ -39,11 +39,39 @@ stackEmpty(Stack *stack)
   return (stack->size == 0) ? true : false;
 }
 
-void *stackPeek(Stack *stack)
+void *
+stackPeek(Stack *stack)
 {
   if(!stackEmpty(stack) ) {
     return stack->top->elet;
   }
+  else
+    return NULL;
+}
+
+StackElet *
+stackTop(Stack *stack)
+{
+  if(!stackEmpty(stack) )
+    return stack->top;
+  else
+    return NULL;
+}
+
+StackElet *
+stackNextElet(StackElet *stackElet)
+{
+  if(stackElet != NULL)
+    return stackElet->next;
+  else
+    return NULL;
+}
+
+void *
+stackGetElet(StackElet *stackElet)
+{
+  if(stackElet != NULL)
+    return stackElet->elet;
   else
     return NULL;
 }

@@ -144,6 +144,15 @@ isTPMMemNode(TPMNode *node)
     return false;
 }
 
+bool
+areSameBuffer(TPMNode2 *l, TPMNode2 *r)
+{
+  if(l->bufid == r->bufid)
+    return true;
+  else
+    return false;
+}
+
 TaintedBuf *createTaintedBuf(TPMNode2 *bufstart)
 {
   TaintedBuf *taintedBuf = malloc(sizeof(TaintedBuf) );

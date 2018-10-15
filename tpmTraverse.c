@@ -11,10 +11,14 @@
 #include "stack.h"
 #include "tpm.h"
 
+/* dfs */
 static void dfs_tpmTraverse(TPMNode2 *srcNode);
 static bool dfs_isVisitNode(TPMNode2 *srcNode, u32 visitNodeIdx);
 static bool dfs_isLeafNode(TPMNode *node);
 static void dfs_traverseChildren(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
+
+/* update buffer hit count array */
+static void updateBufHitCountAry(Stack *stack);
 
 void
 tpmTraverse(TPMNode2 *srcNode)
@@ -33,7 +37,7 @@ dfs_tpmTraverse(TPMNode2 *srcNode)
   // stackPush(memStack, srcNode);
 
   while(!stackEmpty(nodeStack) ) {
-    TPMNode *node = (TPMNode *)stackPeek(nodeStack);
+    TPMNode *node = (TPMNode *)(stackPeek(nodeStack) );
 
     if(dfs_isVisitNode(srcNode, node->tpmnode1.visitNodeIdx) ) { // visited node
       if(isTPMMemNode(node) ) {
@@ -46,11 +50,12 @@ dfs_tpmTraverse(TPMNode2 *srcNode)
     else{ // unvisited node
       node->tpmnode1.visitNodeIdx = (u32)srcNode; // use the src node ptr val as
       // unique idx to mark if the node had been visited from the source node
-//      printf("visitNodeIdx:0x%x\n", node->tpmnode1.visitNodeIdx);
+      // printf("visitNodeIdx:0x%x\n", node->tpmnode1.visitNodeIdx);
 
       if(isTPMMemNode(node) ) {
         stackPush(memStack, node);
-//        printMemNodeLit((TPMNode2 *)stackPeek(memStack) );
+        // printMemNodeLit((TPMNode2 *)stackPeek(memStack) );
+        updateBufHitCountAry(memStack);
       }
 
       if(dfs_isLeafNode(node) ) {
@@ -101,5 +106,31 @@ dfs_traverseChildren(TPMNode2 *srcNode, TPMNode *farther, Stack *stack)
       stackPush(stack, child);
     }
     firstChild = firstChild->next;
+  }
+}
+
+/* update buffer hit count array related */
+static void
+updateBufHitCountAry(Stack *stack)
+{
+  if(stackSize(stack) < 2)
+    return;
+
+  StackElet *topElet = stackTop(stack);
+  StackElet *srcElet = stackNextElet(topElet); // src starts from last second
+  // elet in stack
+
+  TPMNode2 *dstNode = (TPMNode2 *)stackPeek(stack); // dst node is last elet in stack
+  while(srcElet != NULL) {
+    TPMNode2 * srcNode = (TPMNode2 *)stackGetElet(srcElet);
+    if(!areSameBuffer(srcNode, dstNode) ) {
+      printf("----- \nupdate hit count buffer array:\n");
+      printf("src:\t");
+      printMemNodeLit(srcNode);
+      printf("dst:\t");
+      printMemNodeLit(dstNode);
+    }
+
+    srcElet = stackNextElet(srcElet);
   }
 }

@@ -110,6 +110,9 @@ getMemNode1stVersion(struct TPMNode2 **earliest);
 bool
 isTPMMemNode(TPMNode *node);
 
+bool
+areSameBuffer(TPMNode2 *l, TPMNode2 *r);
+
 /* Tainted buffer operation */
 TaintedBuf *
 createTaintedBuf(TPMNode2 *bufstart);
