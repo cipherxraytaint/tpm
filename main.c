@@ -8,6 +8,7 @@
 #include "misc.h"
 #include "stat.h"
 #include "tpm.h"
+#include "tpmTraverse.h"
 
 void usage()
 {
@@ -51,10 +52,14 @@ int main(int argc, char const *argv[])
         tpmBufCtxt = initTPMBufContext(tpm);    // For HitMap usage
 
         u32 numTPMSrcNode = 0;
-        TPMNode2 **tpmSrcNode;
+        TPMNode2 **aryTPMSrcNode;
 
-        tpmSrcNode = getTPMSrcNode(tpmBufCtxt, &numTPMSrcNode);
-        delTPMSrcNode(tpmSrcNode);
+        aryTPMSrcNode = getTPMSrcNode(tpmBufCtxt, &numTPMSrcNode);
+        for(int i = 0; i < numTPMSrcNode; i++) {
+//          printMemNodeLit(aryTPMSrcNode[i]);
+          tpmTraverse(aryTPMSrcNode[i]);
+        }
+        delTPMSrcNode(aryTPMSrcNode);
 
         /* 10/2/18
          * Changed the design, no need to build HitMap any more */
@@ -91,8 +96,8 @@ int main(int argc, char const *argv[])
         delHitMapBufHitCnt(hitMap);
         delHitMapBufContext(hitMap->hitMapBufCtxt);
         delHitMap(hitMap);
-
         */
+
         // searchAllAvalancheInTPM(tpm);
         delTPM(tpm);
       }
