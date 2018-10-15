@@ -56,7 +56,8 @@ int main(int argc, char const *argv[])
         tpmSrcNode = getTPMSrcNode(tpmBufCtxt, &numTPMSrcNode);
         delTPMSrcNode(tpmSrcNode);
 
-        /* Change the design, no need to build HitMap any more */
+        /* 10/2/18
+         * Changed the design, no need to build HitMap any more */
         /*
         hitMap = buildHitMap(tpm, tpmBufCtxt);   // TODO: flag forward or reverse build
         print_hitmap_source(hitMap);
