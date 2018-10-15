@@ -7,7 +7,7 @@ LF	= -g
 OBJS	= main.o tpm.o tpmnode.o record.o stat.o propagate.o avalanche.o continbuf.o avalanchetype.o \
 		  misc.o hitmapnode.o hitmap.o hitmapavaltype.o hitmapavalanche.o hitmappropagate.o bufhitcnt.o \
 		  hitmap_addr2nodeitem_datastruct.o \
-		  tpmTraverse.o stack.o
+		  tpmTraverse.o stack.o bufHitCountArray.o
 
 all	: tpm #testtpm
 
@@ -76,6 +76,9 @@ tpmTraverse.o : tpmTraverse.c
 
 stack.o : stack.c
 	$(CC) $(CF) -c stack.c
+
+bufHitCountArray.o : bufHitCountArray.c
+	$(CC) $(CF) -c bufHitCountArray.c
 
 clean	:
 	rm -rf *.o tpm testtpm

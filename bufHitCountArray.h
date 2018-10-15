@@ -12,7 +12,7 @@
  *
  *   the hit counts from buffer 1 to 2: 64, 1 to 3: 32, etc.
  *
- *  Currently the maximum hit count bytes is 255 (1 byte), if a elet reaches its
+ *  Currently the maximum hit count bytes is 255 (1 byte width), if a elet reaches its
  *  maximum, do not update any further.
  */
 
@@ -22,6 +22,7 @@
 #include "type.h"
 
 #define HIT_COUNT_BYTE unsigned char// 1 byte
+#define MAX_HIT_COUNT 255 // max hit count of 1 byte
 
 typedef HIT_COUNT_BYTE *BufHitCountAry_T;
 
@@ -44,6 +45,7 @@ extern BufHitCountAry_T newBufHitCountAry(u32 numBuf);
  */
 extern int updateBufHitCountAry(
     BufHitCountAry_T bufHitCountAry,
+    u32 numBuf,
     u32 srcBufID,
     u32 dstBufID,
     u8 hitCountByte);

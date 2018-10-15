@@ -12,23 +12,26 @@
 #include "tpm.h"
 
 /* dfs */
-static void dfs_tpmTraverse(TPMNode2 *srcNode);
+static void dfs_tpmTraverse(TPMNode2 *srcNode, BufHitCountAry_T bufHitCountAry, u32 numBuf);
 static bool dfs_isVisitNode(TPMNode2 *srcNode, u32 visitNodeIdx);
 static bool dfs_isLeafNode(TPMNode *node);
 static void dfs_traverseChildren(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
 
 /* update buffer hit count array */
-static void updateBufHitCountAry(Stack *stack);
+static void dfs_updateBufHitCountAry(Stack *stack, BufHitCountAry_T bufHitCountAry, u32 numBuf);
 
 void
-tpmTraverse(TPMNode2 *srcNode)
+tpmTraverse(
+    TPMNode2 *srcNode,
+    BufHitCountAry_T bufHitCountAry,
+    u32 numBuf)
 {
-  dfs_tpmTraverse(srcNode);
+  dfs_tpmTraverse(srcNode, bufHitCountAry, numBuf);
 }
 
 /* static functions */
 static void
-dfs_tpmTraverse(TPMNode2 *srcNode)
+dfs_tpmTraverse(TPMNode2 *srcNode, BufHitCountAry_T bufHitCountAry, u32 numBuf)
 {
   Stack *nodeStack = stackNew();    // node stack for both mem and non-mem type
   Stack *memStack = stackNew();     // node stack for mem
@@ -55,7 +58,7 @@ dfs_tpmTraverse(TPMNode2 *srcNode)
       if(isTPMMemNode(node) ) {
         stackPush(memStack, node);
         // printMemNodeLit((TPMNode2 *)stackPeek(memStack) );
-        updateBufHitCountAry(memStack);
+        dfs_updateBufHitCountAry(memStack, bufHitCountAry, numBuf);
       }
 
       if(dfs_isLeafNode(node) ) {
@@ -111,7 +114,10 @@ dfs_traverseChildren(TPMNode2 *srcNode, TPMNode *farther, Stack *stack)
 
 /* update buffer hit count array related */
 static void
-updateBufHitCountAry(Stack *stack)
+dfs_updateBufHitCountAry(
+    Stack *stack,
+    BufHitCountAry_T bufHitCountAry,
+    u32 numBuf)
 {
   if(stackSize(stack) < 2)
     return;
@@ -124,11 +130,17 @@ updateBufHitCountAry(Stack *stack)
   while(srcElet != NULL) {
     TPMNode2 * srcNode = (TPMNode2 *)stackGetElet(srcElet);
     if(!areSameBuffer(srcNode, dstNode) ) {
-      printf("----- \nupdate hit count buffer array:\n");
-      printf("src:\t");
-      printMemNodeLit(srcNode);
-      printf("dst:\t");
-      printMemNodeLit(dstNode);
+//      printf("----- \nupdate hit count buffer array:\n");
+//      printf("src:\t");
+//      printMemNodeLit(srcNode);
+//      printf("dst:\t");
+//      printMemNodeLit(dstNode);
+      // Temporary
+      if(srcNode->bufid > 0 && dstNode->bufid > 0) {
+        u32 srcBufIdx = srcNode->bufid - 1;
+        u32 dstBufIdx = dstNode->bufid - 1;
+        updateBufHitCountAry(bufHitCountAry, numBuf, srcBufIdx, dstBufIdx, dstNode->bytesz);
+      }
     }
 
     srcElet = stackNextElet(srcElet);
