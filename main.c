@@ -2,12 +2,14 @@
 
 #include "avalanche.h"
 #include "bufhitcnt.h"
+#include "bufHitCountArray.h" // hit count buffer array for tpm
 #include "env.h"
 #include "hitmap.h"
 #include "hitmapavalanche.h"
 #include "misc.h"
 #include "stat.h"
 #include "tpm.h"
+#include "tpmTraverse.h"
 
 void usage()
 {
@@ -40,7 +42,6 @@ int main(int argc, char const *argv[])
         printTime("Finish building TPM");
         // print_tpm_source(tpm);
 
-        tpmBufCtxt = initTPMBufContext(tpm);    // For HitMap usage
 #if TPM_RE_TRANSITON
         // disp_tpm_buf_source(tpm, tpmBufCtxt, 89);
 #endif
@@ -49,8 +50,29 @@ int main(int argc, char const *argv[])
         // benchTPMDFS(tpm);
 #endif
 
+        tpmBufCtxt = initTPMBufContext(tpm);    // For HitMap usage
+
+        u32 numTPMSrcNode = 0;
+        TPMNode2 **aryTPMSrcNode;
+        BufHitCountAry_T tpmBufHitCountAry = newBufHitCountAry(tpmBufCtxt->numOfBuf);
+
+        aryTPMSrcNode = getTPMSrcNode(tpmBufCtxt, &numTPMSrcNode);
+        for(int i = 0; i < numTPMSrcNode; i++) {
+          // printMemNodeLit(aryTPMSrcNode[i]);
+          tpmTraverse(aryTPMSrcNode[i], tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
+        }
+        delTPMSrcNode(aryTPMSrcNode);
+
+        printBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
+        statBufHitCountArray(tpmBufHitCountAry, tpmBufCtxt->numOfBuf, 64);
+        delBufHitCountAry(&tpmBufHitCountAry);
+
+        /* 10/2/18
+         * Changed the design, no need to build HitMap any more
+         */
+        /*
         hitMap = buildHitMap(tpm, tpmBufCtxt);   // TODO: flag forward or reverse build
-        print_hitmap_source(hitMap);
+        // print_hitmap_source(hitMap);
 
         compHitMapStat(hitMap);
         // compReverseHitMapStat(hitMap);
@@ -68,6 +90,7 @@ int main(int argc, char const *argv[])
           // Temporary Comment for debug
           createHitMapBuftHitCnt(hitMap);   // creates IN/OUT aggregate hit count array for each HitMap buffer
           analyze_aggrgt_hitcntary(hitMap, bufType, bufHitCntArray, 64);
+          printBufHitCntArray(bufHitCntArray, hitMap->hitMapBufCtxt->numOfBuf);
           // printHitMapBufHitCntAry(hitMap);
 
           compBufHitCntArrayStat(hitMap, bufType, bufHitCntArray, 64);      // 64 bytes
@@ -81,6 +104,7 @@ int main(int argc, char const *argv[])
         delHitMapBufHitCnt(hitMap);
         delHitMapBufContext(hitMap->hitMapBufCtxt);
         delHitMap(hitMap);
+        */
 
         // searchAllAvalancheInTPM(tpm);
         delTPM(tpm);

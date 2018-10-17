@@ -135,6 +135,24 @@ getMemNode1stVersion(struct TPMNode2 **earliest)
   return 0;
 }
 
+bool
+isTPMMemNode(TPMNode *node)
+{
+  if(node->tpmnode1.type == TPM_Type_Memory)
+    return true;
+  else
+    return false;
+}
+
+bool
+areSameBuffer(TPMNode2 *l, TPMNode2 *r)
+{
+  if(l->bufid == r->bufid)
+    return true;
+  else
+    return false;
+}
+
 TaintedBuf *createTaintedBuf(TPMNode2 *bufstart)
 {
   TaintedBuf *taintedBuf = malloc(sizeof(TaintedBuf) );

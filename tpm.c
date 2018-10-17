@@ -436,6 +436,52 @@ void delTPM(struct TPMContext *tpm)
   // - free TPMBufHashTable
 }
 
+TPMNode2 **
+getTPMSrcNode(TPMBufContext *tpmBufCtxt, u32 *numTPMSrcNode)
+{
+  *numTPMSrcNode = 0;
+  TPMBufHashTable *buf = tpmBufCtxt->tpmBufHash;
+
+  TPMNode2 **tpmSrcNode = calloc(NUM_TPMSrcNode, sizeof(TPMNode2 *) );
+  assert(tpmSrcNode != NULL);
+
+  for(; buf != NULL; buf = buf->hh_tpmBufHT.next) {
+    TPMNode2 *addrHead = buf->headNode;
+
+    while(addrHead != NULL) {
+      TPMNode2 *verHead = addrHead;
+      u32 ver = verHead->version;
+
+      do {
+        if(verHead->lastUpdateTS < 0) {
+          // printMemNodeLit(verHead);
+          tpmSrcNode[*numTPMSrcNode] = verHead;
+          (*numTPMSrcNode)++;
+        }
+        verHead = verHead->nextVersion;
+      } while(ver != verHead->version);
+
+      addrHead = addrHead->rightNBR;
+    }
+  }
+
+  printf("Total TPM source nodes:%u\n", *numTPMSrcNode);
+//  for(int i = 0; i < *numTPMSrcNode; i++) {
+//    printMemNodeLit(aryTPMSrcNode[i]);
+//  }
+  return tpmSrcNode;
+}
+
+void
+delTPMSrcNode(TPMNode2 **aryTPMSrcNode)
+{
+  if(aryTPMSrcNode != NULL) {
+    free(aryTPMSrcNode);
+    printf("del array of TPM source nodes\n");
+  }
+}
+
+/* Transitions related */
 TPMNode *
 getTransitionDst(Transition *transition)
 {
