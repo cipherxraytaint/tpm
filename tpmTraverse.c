@@ -12,26 +12,35 @@
 #include "tpm.h"
 
 /* dfs */
-static void dfs_tpmTraverse(TPMNode2 *srcNode, BufHitCountAry_T bufHitCountAry, u32 numBuf);
-static bool dfs_isVisitNode(TPMNode2 *srcNode, u32 visitNodeIdx);
-static bool dfs_isLeafNode(TPMNode *node);
-static void dfs_traverseChildren(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
+static void
+dfs_tpmTraverse(TPMNode2 *srcNode, void *operationCtxt);
+
+static bool
+dfs_isVisitNode(TPMNode2 *srcNode, u32 visitNodeIdx);
+
+static bool
+dfs_isLeafNode(TPMNode *node);
+
+static void
+dfs_traverseChildren(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
 
 /* update buffer hit count array */
-static void dfs_updateBufHitCountAry(Stack *stack, BufHitCountAry_T bufHitCountAry, u32 numBuf);
+static void
+dfs_updateBufHitCountAry(Stack *stack, void *operationCtxt);
 
 void
 tpmTraverse(
     TPMNode2 *srcNode,
-    BufHitCountAry_T bufHitCountAry,
-    u32 numBuf)
+    void *operationCtxt)
 {
-  dfs_tpmTraverse(srcNode, bufHitCountAry, numBuf);
+  dfs_tpmTraverse(srcNode, operationCtxt);
 }
 
 /* static functions */
 static void
-dfs_tpmTraverse(TPMNode2 *srcNode, BufHitCountAry_T bufHitCountAry, u32 numBuf)
+dfs_tpmTraverse(
+    TPMNode2 *srcNode,
+    void *operationCtxt)
 {
   Stack *nodeStack = stackNew();    // node stack for both mem and non-mem type
   Stack *memStack = stackNew();     // node stack for mem
@@ -58,7 +67,7 @@ dfs_tpmTraverse(TPMNode2 *srcNode, BufHitCountAry_T bufHitCountAry, u32 numBuf)
       if(isTPMMemNode(node) ) {
         stackPush(memStack, node);
         // printMemNodeLit((TPMNode2 *)stackPeek(memStack) );
-        dfs_updateBufHitCountAry(memStack, bufHitCountAry, numBuf);
+        dfs_updateBufHitCountAry(memStack, operationCtxt);
       }
 
       if(dfs_isLeafNode(node) ) {
@@ -116,11 +125,12 @@ dfs_traverseChildren(TPMNode2 *srcNode, TPMNode *farther, Stack *stack)
 static void
 dfs_updateBufHitCountAry(
     Stack *stack,
-    BufHitCountAry_T bufHitCountAry,
-    u32 numBuf)
+    void *operationCtxt)
 {
   if(stackSize(stack) < 2)
     return;
+
+  BufHitCountAryCtxt *bufHitCountAryCtxt = (BufHitCountAryCtxt *)operationCtxt;
 
   StackElet *topElet = stackTop(stack);
   StackElet *srcElet = stackNextElet(topElet); // src starts from last second
@@ -139,7 +149,8 @@ dfs_updateBufHitCountAry(
       if(srcNode->bufid > 0 && dstNode->bufid > 0) {
         u32 srcBufIdx = srcNode->bufid - 1;
         u32 dstBufIdx = dstNode->bufid - 1;
-        updateBufHitCountAry(bufHitCountAry, numBuf, srcBufIdx, dstBufIdx, dstNode->bytesz);
+        updateBufHitCountAry(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
+            srcBufIdx, dstBufIdx, dstNode->bytesz);
       }
     }
 

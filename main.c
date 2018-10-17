@@ -50,22 +50,27 @@ int main(int argc, char const *argv[])
         // benchTPMDFS(tpm);
 #endif
 
-        tpmBufCtxt = initTPMBufContext(tpm);    // For HitMap usage
+        tpmBufCtxt = initTPMBufContext(tpm); // analyze tpm buffers (could use for HitMap)
 
         u32 numTPMSrcNode = 0;
-        TPMNode2 **aryTPMSrcNode;
-        BufHitCountAry_T tpmBufHitCountAry = newBufHitCountAry(tpmBufCtxt->numOfBuf);
+        TPMNode2 **aryTPMSrcNode = getTPMSrcNode(tpmBufCtxt, &numTPMSrcNode);
 
-        aryTPMSrcNode = getTPMSrcNode(tpmBufCtxt, &numTPMSrcNode);
+        BufHitCountAry tpmBufHitCountAry = newBufHitCountAry(tpmBufCtxt->numOfBuf);
+        BufHitCountAryCtxt *tpmBufHitCountAryCtxt = newBufHitCountAryCtxt(
+                                                    tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
+
         for(int i = 0; i < numTPMSrcNode; i++) {
           // printMemNodeLit(aryTPMSrcNode[i]);
-          tpmTraverse(aryTPMSrcNode[i], tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
+          tpmTraverse(aryTPMSrcNode[i], tpmBufHitCountAryCtxt);
         }
-        delTPMSrcNode(aryTPMSrcNode);
 
         printBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
         statBufHitCountArray(tpmBufHitCountAry, tpmBufCtxt->numOfBuf, 64);
+
         delBufHitCountAry(&tpmBufHitCountAry);
+        delBufHitCountAryCtxt(&tpmBufHitCountAryCtxt);
+
+        delTPMSrcNode(aryTPMSrcNode);
 
         /* 10/2/18
          * Changed the design, no need to build HitMap any more

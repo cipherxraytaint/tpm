@@ -13,12 +13,15 @@
 #include "tpmnode.h"
 
 /*
- * Traverse the whole tpm based on a memory type source node.
+ * Traverse the whole tpm based on a memory type source node and perform
+ * needed operations.
+ *  @srcNode:
+ *   the source memory node starts traversing
+ *  @operationCtxt:
+ *   the performing operations context during traversing
  */
-void
-tpmTraverse(
+void tpmTraverse(
     TPMNode2 *srcNode,
-    BufHitCountAry_T bufHitCountAry,
-    u32 numBuf);
+    void *operationCtxt);
 
 #endif /* TPM_TRAVERSE_H_ */

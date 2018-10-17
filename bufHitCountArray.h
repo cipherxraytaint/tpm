@@ -2,7 +2,9 @@
  * bufHitCountArray.h
  *  Author: mchen
  *
- *  buffer hit count array is a 2D array, each elet records hit counts (propagations) from
+ *  Buffer hit count array for tpm, extends bufhitcnt.* files.
+ *
+ *  Buffer hit count array is a 2D array, each elet records hit counts (propagations) from
  *  a src buffer to a dst buffer. For example,
  *   buf 1  2  3...
  *    1     64 32 ...
@@ -16,21 +18,25 @@
  *  maximum, do not update any further.
  */
 
-#ifndef BUFHITCOUNTARRAY_H_
-#define BUFHITCOUNTARRAY_H_
+#ifndef BUF_HITCOUNTARRAY_H_
+#define BUF_HITCOUNTARRAY_H_
 
 #include "type.h"
 
-#define HIT_COUNT_BYTE unsigned char// 1 byte
-#define MAX_HIT_COUNT 255 // max hit count of 1 byte
+#define HIT_COUNT_BYTE unsigned char // 1 byte
+#define MAX_HIT_COUNT 255            // max hit count of 1 byte
 
-typedef HIT_COUNT_BYTE *BufHitCountAry_T;
+typedef HIT_COUNT_BYTE *BufHitCountAry; // unsigned char *
+
+/* ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+ * Buffer hit count array functions.
+ * ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** */
 
 /*
  * Allocates a 8*numBuf*numBuf bytes array.
  * Returns the BufHitCountAry_T type (a pointer)
  */
-extern BufHitCountAry_T newBufHitCountAry(u32 numBuf);
+extern BufHitCountAry newBufHitCountAry(u32 numBuf);
 
 /*
  * Updates the buffer hit count array as:
@@ -44,7 +50,7 @@ extern BufHitCountAry_T newBufHitCountAry(u32 numBuf);
  *  otherwise, fail
  */
 extern int updateBufHitCountAry(
-    BufHitCountAry_T bufHitCountAry,
+    BufHitCountAry bufHitCountAry,
     u32 numBuf,
     u32 srcBufID,
     u32 dstBufID,
@@ -53,16 +59,33 @@ extern int updateBufHitCountAry(
 /*
  * Del the buffer hit count array, passes a BufHitCountAry_T **
  */
-extern void delBufHitCountAry(BufHitCountAry_T *bufHitCountAry);
+extern void delBufHitCountAry(BufHitCountAry *bufHitCountAry);
 
 extern void statBufHitCountArray(
-    BufHitCountAry_T bufHitCountAry,
+    BufHitCountAry bufHitCountAry,
     u32 numBuf,
     u32 byteThreashold);
 
-
 extern void printBufHitCountAry(
-    BufHitCountAry_T bufHitCountAry,
+    BufHitCountAry bufHitCountAry,
     u32 numBuf);
 
-#endif /* BUFHITCOUNTARRAY_H_ */
+/*
+ * Buffer hit count array context
+ *  needed to perform related operations. For example, if a tpm traverser wants
+ *  to update the corresponding buffer hit count array, it needs these context
+ *  information
+ */
+typedef struct BufHitCountAryCtxt_ {
+  BufHitCountAry bufHitCountAry;    // the buf hit count array
+  u32 numBuf;   // number of buffers of the buf hit count array
+} BufHitCountAryCtxt;
+
+/* ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+ * Buffer hit count array context functions.
+ * ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** */
+
+BufHitCountAryCtxt *newBufHitCountAryCtxt(BufHitCountAry bufHitCountAry, u32 numBuf);
+void delBufHitCountAryCtxt(BufHitCountAryCtxt **bufHitCountAryCtxt);
+
+#endif /* BUF_HITCOUNTARRAY_H_ */
