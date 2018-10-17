@@ -47,6 +47,25 @@ void delBufHitCountAry(BufHitCountAry_T *bufHitCountAry)
   printf("del buffer hit count array:%p successful\n", *bufHitCountAry);
 }
 
+void statBufHitCountArray(
+    BufHitCountAry_T *bufHitCountAry,
+    u32 numBuf,
+    u32 byteThreashold)
+{
+  u32 hitThreash = 0;
+
+  for(size_t r = 0; r < numBuf; r++) {
+    for (size_t c = 0; c < numBuf; c++) {
+      HIT_COUNT_BYTE val = bufHitCountAry[r*numBuf + c];
+      if(val >= byteThreashold)
+        hitThreash++;
+    }
+  }
+  printf("----------\nnum of buf pair hitcnt > %u bytes:%u - total buf pair:%u - ratio:%u%%\n",
+      byteThreashold, hitThreash, numBuf*numBuf, (hitThreash * 100) / (numBuf*numBuf) );
+
+}
+
 void printBufHitCountAry(
     BufHitCountAry_T bufHitCountAry,
     u32 numBuf)

@@ -64,6 +64,7 @@ int main(int argc, char const *argv[])
         delTPMSrcNode(aryTPMSrcNode);
 
         printBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
+        statBufHitCountArray(tpmBufHitCountAry, tpmBufCtxt->numOfBuf, 64);
         delBufHitCountAry(&tpmBufHitCountAry);
 
         /* 10/2/18
