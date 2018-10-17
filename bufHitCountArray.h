@@ -56,7 +56,7 @@ extern int updateBufHitCountAry(
 extern void delBufHitCountAry(BufHitCountAry_T *bufHitCountAry);
 
 extern void statBufHitCountArray(
-    BufHitCountAry_T *bufHitCountAry,
+    BufHitCountAry_T bufHitCountAry,
     u32 numBuf,
     u32 byteThreashold);
 
