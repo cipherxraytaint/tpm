@@ -13,7 +13,7 @@
 
 /* dfs traverse node */
 static void
-dfs_tpmTraverse(TPMNode2 *srcNode, void *operationCtxt);
+dfs_tpmTraverseNode(TPMNode2 *srcNode, void *operationCtxt);
 
 static bool
 dfs_isVisitNode(TPMNode2 *srcNode, u32 visitNodeIdx);
@@ -22,7 +22,18 @@ static bool
 dfs_isLeafNode(TPMNode *node);
 
 static void
-dfs_traverseChildren(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
+dfs_traverseChildrenNode(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
+
+/* dfs traverse transition */
+static void
+dfs_tpmTraverseTrans(TPMNode2 *srcNode, void *operationCtxt);
+
+static bool
+dfs_isVisitTrans(TPMNode2 *srcNode, u32 visitTransIdx);
+
+static void
+dfs_traverseChildrenTrans(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
+
 
 /* update buffer hit count array */
 static void
@@ -33,12 +44,18 @@ tpmTraverse(
     TPMNode2 *srcNode,
     void *operationCtxt)
 {
-  dfs_tpmTraverse(srcNode, operationCtxt);
+  // dfs_tpmTraverseNode(srcNode, operationCtxt);
+  dfs_tpmTraverseTrans(srcNode, operationCtxt);
 }
 
 /* static functions */
+
+/* ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+ * dfs traverse node
+ * ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** */
+
 static void
-dfs_tpmTraverse(
+dfs_tpmTraverseNode(
     TPMNode2 *srcNode,
     void *operationCtxt)
 {
@@ -78,7 +95,7 @@ dfs_tpmTraverse(
         stackPop(nodeStack);
       }
       else {
-        dfs_traverseChildren(srcNode, node, nodeStack);
+        dfs_traverseChildrenNode(srcNode, node, nodeStack);
       }
     }
   }
@@ -108,7 +125,7 @@ dfs_isLeafNode(TPMNode *node)
 }
 
 static void
-dfs_traverseChildren(TPMNode2 *srcNode, TPMNode *farther, Stack *stack)
+dfs_traverseChildrenNode(TPMNode2 *srcNode, TPMNode *farther, Stack *stack)
 {
   Transition *firstChild = farther->tpmnode1.firstChild;
   while(firstChild != NULL) {
@@ -155,5 +172,73 @@ dfs_updateBufHitCountAry(
     }
 
     srcElet = stackNextElet(srcElet);
+  }
+}
+
+/* ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+ * dfs traverse transitions
+ * ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** */
+static void
+dfs_tpmTraverseTrans(TPMNode2 *srcNode, void *operationCtxt)
+{
+  Stack *transStack = stackNew(); // transition stack for tpm
+  Stack *memStack = stackNew();   // node stack for mem
+
+  Transition *first = srcNode->firstChild;
+  while(first != NULL) {
+    stackPush(transStack, first);
+    first = first->next;
+  }
+
+  stackPush(memStack, srcNode);
+
+  while(!stackEmpty(transStack) ) {
+    Transition *topTrans = (Transition *)stackPeek(transStack);
+    TPMNode *topNode = topTrans->child;
+
+    if(dfs_isVisitTrans(srcNode, topTrans->hasVisit) ) {
+      stackPop(transStack);
+    }
+    else { // new transition
+      topTrans->hasVisit = (u32)srcNode; // use the src node ptr val as
+      // unique idx to mark if the trans had been visited from the source node
+
+      if(isTPMMemNode(topNode) ) {
+        stackPush(memStack, &(topNode->tpmnode2) );
+        printMemNodeLit((TPMNode2 *)stackPeek(memStack) );
+        // dfs_updateBufHitCountAry(memStack, operationCtxt);
+      }
+
+      if(dfs_isLeafNode(topNode) ) {
+        stackPop(transStack);
+      }
+      else {
+        dfs_traverseChildrenTrans(srcNode, topNode, transStack);
+      }
+    }
+  }
+
+  stackDel(transStack);
+  stackDel(memStack);
+}
+
+static bool
+dfs_isVisitTrans(TPMNode2 *srcNode, u32 visitTransIdx)
+{
+  if((u32)(srcNode) == visitTransIdx)
+    return true;
+  else
+    return false;
+}
+
+static void
+dfs_traverseChildrenTrans(TPMNode2 *srcNode, TPMNode *farther, Stack *stack)
+{
+  Transition *firstChild = farther->tpmnode1.firstChild;
+  while(firstChild != NULL) {
+    if(!dfs_isVisitTrans(srcNode, firstChild->hasVisit) ) {
+      stackPush(stack, firstChild);
+    }
+    firstChild = firstChild->next;
   }
 }

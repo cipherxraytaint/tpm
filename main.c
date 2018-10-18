@@ -64,8 +64,8 @@ int main(int argc, char const *argv[])
           tpmTraverse(aryTPMSrcNode[i], tpmBufHitCountAryCtxt);
         }
 
-        printBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
-        statBufHitCountArray(tpmBufHitCountAry, tpmBufCtxt->numOfBuf, 64);
+        // printBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
+        // statBufHitCountArray(tpmBufHitCountAry, tpmBufCtxt->numOfBuf, 64);
 
         delBufHitCountAry(&tpmBufHitCountAry);
         delBufHitCountAryCtxt(&tpmBufHitCountAryCtxt);
