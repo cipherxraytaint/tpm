@@ -148,7 +148,7 @@ static void
 dfs_tpmTraverseTrans(TPMNode2 *srcNode, void *operationCtxt)
 {
   Stack *transStack = stackNew(); // transition stack for tpm
-  Stack *memStack = stackNew();   // node stack for mem
+  Stack *memTransStack = stackNew(); // node stack for mem
 
   Transition *first = srcNode->firstChild;
   while(first != NULL) {
@@ -156,7 +156,7 @@ dfs_tpmTraverseTrans(TPMNode2 *srcNode, void *operationCtxt)
     first = first->next;
   }
 
-  stackPush(memStack, srcNode);
+  // stackPush(memTransStack, srcNode);
 
   while(!stackEmpty(transStack) ) {
     Transition *topTrans = (Transition *)stackPeek(transStack);
@@ -164,8 +164,8 @@ dfs_tpmTraverseTrans(TPMNode2 *srcNode, void *operationCtxt)
 
     if(dfs_isVisitTrans(srcNode, topTrans->hasVisit) ) {
       if(isTPMMemNode(topNode) ) {
-        assert(&(topNode->tpmnode2) == (TPMNode2 *)stackPeek(memStack) );
-        stackPop(memStack);
+        assert(topTrans == (Transition *)stackPeek(memTransStack) );
+        stackPop(memTransStack);
       }
 
       stackPop(transStack);
@@ -175,15 +175,16 @@ dfs_tpmTraverseTrans(TPMNode2 *srcNode, void *operationCtxt)
       // unique idx to mark if the trans had been visited from the source node
 
       if(isTPMMemNode(topNode) ) {
-        stackPush(memStack, &(topNode->tpmnode2) );
-        // printMemNodeLit((TPMNode2 *)stackPeek(memStack) );
-        dfsTrans_updateBufHitCountAry(srcNode, memStack, operationCtxt);
+        stackPush(memTransStack, topTrans );
+        // Transition *trans = stackPeek(memTransStack);
+        // printMemNodeLit( &(trans->child->tpmnode2) );
+        dfsTrans_updateBufHitCountAry(srcNode, memTransStack, operationCtxt);
       }
 
       if(dfs_isLeafNode(topNode) ) {
         if(isTPMMemNode(topNode) ) {
-          assert(&(topNode->tpmnode2) == (TPMNode2 *)stackPeek(memStack) );
-          stackPop(memStack);
+          assert(topTrans == (Transition *)stackPeek(memTransStack) );
+          stackPop(memTransStack);
         }
         stackPop(transStack);
       }
@@ -194,7 +195,7 @@ dfs_tpmTraverseTrans(TPMNode2 *srcNode, void *operationCtxt)
   }
 
   stackDel(transStack);
-  stackDel(memStack);
+  stackDel(memTransStack);
 }
 
 static bool
@@ -260,34 +261,53 @@ dfsNode_updateBufHitCountAry(
 static void
 dfsTrans_updateBufHitCountAry(TPMNode2 *srcNode, Stack *stack, void *operationCtxt)
 {
-  if(stackSize(stack) < 2)
+  if(stackEmpty(stack))
     return;
 
   BufHitCountAryCtxt *bufHitCountAryCtxt = (BufHitCountAryCtxt *)operationCtxt;
+
+  Transition *dstTrans = (Transition *)stackPeek(stack); // dst trans is last elet in stack
+  TPMNode2 *dstNode = &(dstTrans->child->tpmnode2);
+
+  if(stackSize(stack) <= 1)
+    goto updateSrcNode;
 
   StackElet *topElet = stackTop(stack);
   StackElet *srcElet = stackNextElet(topElet); // src starts from last second
   // elet in stack
 
-  TPMNode2 *dstNode = (TPMNode2 *)stackPeek(stack); // dst node is last elet in stack
   while(srcElet != NULL) {
-    TPMNode2 * srcNode = (TPMNode2 *)stackGetElet(srcElet);
-    if(!areSameBuffer(srcNode, dstNode) ) {
-//      printf("----- \nupdate hit count buffer array:\n");
-//      printf("src:\t");
-//      printMemNodeLit(srcNode);
-//      printf("dst:\t");
-//      printMemNodeLit(dstNode);
-      // Temporary
-      if(srcNode->bufid > 0 && dstNode->bufid > 0) {
-        u32 srcBufIdx = srcNode->bufid - 1;
-        u32 dstBufIdx = dstNode->bufid - 1;
-        updateBufHitCountAry(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
-            srcBufIdx, dstBufIdx, dstNode->bytesz);
+    Transition *intermediateSrcTrans = (Transition *)stackGetElet(srcElet);
+    if(!dfs_isVisitTrans(srcNode, intermediateSrcTrans->hasVisit) ) {
+
+      TPMNode2 * intermediateSrcNode = &(intermediateSrcTrans->child->tpmnode2);
+      if(!areSameBuffer(intermediateSrcNode, dstNode) ) {
+//        printf("----- \nupdate hit count buffer array:\n");
+//        printf("src:\t");
+//        printMemNodeLit(srcNode);
+//        printf("dst:\t");
+//        printMemNodeLit(dstNode);
+        // Temporary
+        if(intermediateSrcNode->bufid > 0 && dstNode->bufid > 0) {
+          u32 srcBufIdx = intermediateSrcNode->bufid - 1;
+          u32 dstBufIdx = dstNode->bufid - 1;
+          updateBufHitCountAry(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
+              srcBufIdx, dstBufIdx, dstNode->bytesz);
+        }
       }
     }
-
     srcElet = stackNextElet(srcElet);
   }
 
+updateSrcNode:
+  //intermediate source node doesn't include the source node to the dst node,
+  // adds it here
+  if(!areSameBuffer(srcNode, dstNode) ) {
+    if(srcNode->bufid > 0 && dstNode->bufid > 0) {
+      u32 srcBufIdx = srcNode->bufid - 1;
+      u32 dstBufIdx = dstNode->bufid - 1;
+      updateBufHitCountAry(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
+          srcBufIdx, dstBufIdx, dstNode->bytesz);
+    }
+  }
 }
