@@ -11,7 +11,7 @@
 #include "stack.h"
 #include "tpm.h"
 
-/* dfs */
+/* dfs traverse node */
 static void
 dfs_tpmTraverse(TPMNode2 *srcNode, void *operationCtxt);
 
