@@ -75,7 +75,8 @@ int main(int argc, char const *argv[])
         /* 10/2/18
          * Changed the design, no need to build HitMap any more
          */
-        /*
+
+
         hitMap = buildHitMap(tpm, tpmBufCtxt);   // TODO: flag forward or reverse build
         // print_hitmap_source(hitMap);
 
@@ -109,7 +110,7 @@ int main(int argc, char const *argv[])
         delHitMapBufHitCnt(hitMap);
         delHitMapBufContext(hitMap->hitMapBufCtxt);
         delHitMap(hitMap);
-        */
+
 
         // searchAllAvalancheInTPM(tpm);
         delTPM(tpm);

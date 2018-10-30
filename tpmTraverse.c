@@ -171,15 +171,15 @@ dfs_tpmTraverseTrans(TPMNode2 *srcNode, void *operationCtxt)
       stackPop(transStack);
     }
     else { // new transition
-      topTrans->hasVisit = (u32)srcNode; // use the src node ptr val as
-      // unique idx to mark if the trans had been visited from the source node
-
       if(isTPMMemNode(topNode) ) {
         stackPush(memTransStack, topTrans );
         // Transition *trans = stackPeek(memTransStack);
         // printMemNodeLit( &(trans->child->tpmnode2) );
         dfsTrans_updateBufHitCountAry(srcNode, memTransStack, operationCtxt);
       }
+
+      topTrans->hasVisit = (u32)srcNode; // use the src node ptr val as
+      // unique idx to mark if the trans had been visited from the source node
 
       if(dfs_isLeafNode(topNode) ) {
         if(isTPMMemNode(topNode) ) {
