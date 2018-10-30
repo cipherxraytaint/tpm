@@ -11,27 +11,56 @@
 #include "stack.h"
 #include "tpm.h"
 
-/* dfs */
-static void dfs_tpmTraverse(TPMNode2 *srcNode, BufHitCountAry_T bufHitCountAry, u32 numBuf);
-static bool dfs_isVisitNode(TPMNode2 *srcNode, u32 visitNodeIdx);
-static bool dfs_isLeafNode(TPMNode *node);
-static void dfs_traverseChildren(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
+/* dfs traverse node */
+static void
+dfs_tpmTraverseNode(TPMNode2 *srcNode, void *operationCtxt);
+
+static bool
+dfs_isVisitNode(TPMNode2 *srcNode, u32 visitNodeIdx);
+
+static bool
+dfs_isLeafNode(TPMNode *node);
+
+static void
+dfs_traverseChildrenNode(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
+
+/* dfs traverse transition */
+static void
+dfs_tpmTraverseTrans(TPMNode2 *srcNode, void *operationCtxt);
+
+static bool
+dfs_isVisitTrans(TPMNode2 *srcNode, u32 visitTransIdx);
+
+static void
+dfs_traverseChildrenTrans(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
+
 
 /* update buffer hit count array */
-static void dfs_updateBufHitCountAry(Stack *stack, BufHitCountAry_T bufHitCountAry, u32 numBuf);
+static void
+dfsNode_updateBufHitCountAry(Stack *stack, void *operationCtxt);
+
+static void
+dfsTrans_updateBufHitCountAry(TPMNode2 *srcNode, Stack *stack, void *operationCtxt);
 
 void
 tpmTraverse(
     TPMNode2 *srcNode,
-    BufHitCountAry_T bufHitCountAry,
-    u32 numBuf)
+    void *operationCtxt)
 {
-  dfs_tpmTraverse(srcNode, bufHitCountAry, numBuf);
+  // dfs_tpmTraverseNode(srcNode, operationCtxt);
+  dfs_tpmTraverseTrans(srcNode, operationCtxt);
 }
 
 /* static functions */
+
+/* ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+ * dfs traverse node
+ * ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** */
+
 static void
-dfs_tpmTraverse(TPMNode2 *srcNode, BufHitCountAry_T bufHitCountAry, u32 numBuf)
+dfs_tpmTraverseNode(
+    TPMNode2 *srcNode,
+    void *operationCtxt)
 {
   Stack *nodeStack = stackNew();    // node stack for both mem and non-mem type
   Stack *memStack = stackNew();     // node stack for mem
@@ -58,7 +87,7 @@ dfs_tpmTraverse(TPMNode2 *srcNode, BufHitCountAry_T bufHitCountAry, u32 numBuf)
       if(isTPMMemNode(node) ) {
         stackPush(memStack, node);
         // printMemNodeLit((TPMNode2 *)stackPeek(memStack) );
-        dfs_updateBufHitCountAry(memStack, bufHitCountAry, numBuf);
+        dfsNode_updateBufHitCountAry(memStack, operationCtxt);
       }
 
       if(dfs_isLeafNode(node) ) {
@@ -69,7 +98,7 @@ dfs_tpmTraverse(TPMNode2 *srcNode, BufHitCountAry_T bufHitCountAry, u32 numBuf)
         stackPop(nodeStack);
       }
       else {
-        dfs_traverseChildren(srcNode, node, nodeStack);
+        dfs_traverseChildrenNode(srcNode, node, nodeStack);
       }
     }
   }
@@ -99,7 +128,7 @@ dfs_isLeafNode(TPMNode *node)
 }
 
 static void
-dfs_traverseChildren(TPMNode2 *srcNode, TPMNode *farther, Stack *stack)
+dfs_traverseChildrenNode(TPMNode2 *srcNode, TPMNode *farther, Stack *stack)
 {
   Transition *firstChild = farther->tpmnode1.firstChild;
   while(firstChild != NULL) {
@@ -112,15 +141,96 @@ dfs_traverseChildren(TPMNode2 *srcNode, TPMNode *farther, Stack *stack)
   }
 }
 
-/* update buffer hit count array related */
+/* ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+ * dfs traverse transitions
+ * ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** */
 static void
-dfs_updateBufHitCountAry(
+dfs_tpmTraverseTrans(TPMNode2 *srcNode, void *operationCtxt)
+{
+  Stack *transStack = stackNew(); // transition stack for tpm
+  Stack *memTransStack = stackNew(); // node stack for mem
+
+  Transition *first = srcNode->firstChild;
+  while(first != NULL) {
+    stackPush(transStack, first);
+    first = first->next;
+  }
+
+  // stackPush(memTransStack, srcNode);
+
+  while(!stackEmpty(transStack) ) {
+    Transition *topTrans = (Transition *)stackPeek(transStack);
+    TPMNode *topNode = topTrans->child;
+
+    if(dfs_isVisitTrans(srcNode, topTrans->hasVisit) ) {
+      if(isTPMMemNode(topNode) ) {
+        assert(topTrans == (Transition *)stackPeek(memTransStack) );
+        stackPop(memTransStack);
+      }
+
+      stackPop(transStack);
+    }
+    else { // new transition
+      if(isTPMMemNode(topNode) ) {
+        stackPush(memTransStack, topTrans );
+        // Transition *trans = stackPeek(memTransStack);
+        // printMemNodeLit( &(trans->child->tpmnode2) );
+        dfsTrans_updateBufHitCountAry(srcNode, memTransStack, operationCtxt);
+      }
+
+      topTrans->hasVisit = (u32)srcNode; // use the src node ptr val as
+      // unique idx to mark if the trans had been visited from the source node
+
+      if(dfs_isLeafNode(topNode) ) {
+        if(isTPMMemNode(topNode) ) {
+          assert(topTrans == (Transition *)stackPeek(memTransStack) );
+          stackPop(memTransStack);
+        }
+        stackPop(transStack);
+      }
+      else {
+        dfs_traverseChildrenTrans(srcNode, topNode, transStack);
+      }
+    }
+  }
+
+  stackDel(transStack);
+  stackDel(memTransStack);
+}
+
+static bool
+dfs_isVisitTrans(TPMNode2 *srcNode, u32 visitTransIdx)
+{
+  if((u32)(srcNode) == visitTransIdx)
+    return true;
+  else
+    return false;
+}
+
+static void
+dfs_traverseChildrenTrans(TPMNode2 *srcNode, TPMNode *farther, Stack *stack)
+{
+  Transition *firstChild = farther->tpmnode1.firstChild;
+  while(firstChild != NULL) {
+    if(!dfs_isVisitTrans(srcNode, firstChild->hasVisit) ) {
+      stackPush(stack, firstChild);
+    }
+    firstChild = firstChild->next;
+  }
+}
+
+/* ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+ * update buffer hit count array related
+ * ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** */
+static void
+dfsNode_updateBufHitCountAry(
     Stack *stack,
-    BufHitCountAry_T bufHitCountAry,
-    u32 numBuf)
+    void *operationCtxt)
 {
   if(stackSize(stack) < 2)
     return;
+
+  BufHitCountAryCtxt *bufHitCountAryCtxt = (BufHitCountAryCtxt *)operationCtxt;
 
   StackElet *topElet = stackTop(stack);
   StackElet *srcElet = stackNextElet(topElet); // src starts from last second
@@ -139,10 +249,65 @@ dfs_updateBufHitCountAry(
       if(srcNode->bufid > 0 && dstNode->bufid > 0) {
         u32 srcBufIdx = srcNode->bufid - 1;
         u32 dstBufIdx = dstNode->bufid - 1;
-        updateBufHitCountAry(bufHitCountAry, numBuf, srcBufIdx, dstBufIdx, dstNode->bytesz);
+        updateBufHitCountAry(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
+            srcBufIdx, dstBufIdx, dstNode->bytesz);
       }
     }
 
     srcElet = stackNextElet(srcElet);
+  }
+}
+
+static void
+dfsTrans_updateBufHitCountAry(TPMNode2 *srcNode, Stack *stack, void *operationCtxt)
+{
+  if(stackEmpty(stack))
+    return;
+
+  BufHitCountAryCtxt *bufHitCountAryCtxt = (BufHitCountAryCtxt *)operationCtxt;
+
+  Transition *dstTrans = (Transition *)stackPeek(stack); // dst trans is last elet in stack
+  TPMNode2 *dstNode = &(dstTrans->child->tpmnode2);
+
+  if(stackSize(stack) <= 1)
+    goto updateSrcNode;
+
+  StackElet *topElet = stackTop(stack);
+  StackElet *srcElet = stackNextElet(topElet); // src starts from last second
+  // elet in stack
+
+  while(srcElet != NULL) {
+    Transition *intermediateSrcTrans = (Transition *)stackGetElet(srcElet);
+    if(!dfs_isVisitTrans(srcNode, intermediateSrcTrans->hasVisit) ) {
+
+      TPMNode2 * intermediateSrcNode = &(intermediateSrcTrans->child->tpmnode2);
+      if(!areSameBuffer(intermediateSrcNode, dstNode) ) {
+//        printf("----- \nupdate hit count buffer array:\n");
+//        printf("src:\t");
+//        printMemNodeLit(srcNode);
+//        printf("dst:\t");
+//        printMemNodeLit(dstNode);
+        // Temporary
+        if(intermediateSrcNode->bufid > 0 && dstNode->bufid > 0) {
+          u32 srcBufIdx = intermediateSrcNode->bufid - 1;
+          u32 dstBufIdx = dstNode->bufid - 1;
+          updateBufHitCountAry(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
+              srcBufIdx, dstBufIdx, dstNode->bytesz);
+        }
+      }
+    }
+    srcElet = stackNextElet(srcElet);
+  }
+
+updateSrcNode:
+  //intermediate source node doesn't include the source node to the dst node,
+  // adds it here
+  if(!areSameBuffer(srcNode, dstNode) ) {
+    if(srcNode->bufid > 0 && dstNode->bufid > 0) {
+      u32 srcBufIdx = srcNode->bufid - 1;
+      u32 dstBufIdx = dstNode->bufid - 1;
+      updateBufHitCountAry(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
+          srcBufIdx, dstBufIdx, dstNode->bytesz);
+    }
   }
 }

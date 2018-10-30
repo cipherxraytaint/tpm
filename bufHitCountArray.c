@@ -8,9 +8,9 @@
 #include <stdlib.h> // calloc
 #include "bufHitCountArray.h"
 
-BufHitCountAry_T newBufHitCountAry(u32 numBuf)
+BufHitCountAry newBufHitCountAry(u32 numBuf)
 {
-  BufHitCountAry_T bufHitCountAry = NULL;
+  BufHitCountAry bufHitCountAry = NULL;
 
   bufHitCountAry = calloc(numBuf*numBuf, sizeof(HIT_COUNT_BYTE) );
   assert(bufHitCountAry);
@@ -21,7 +21,7 @@ BufHitCountAry_T newBufHitCountAry(u32 numBuf)
 }
 
 int updateBufHitCountAry(
-    BufHitCountAry_T bufHitCountAry,
+    BufHitCountAry bufHitCountAry,
     u32 numBuf,
     u32 srcBufID,
     u32 dstBufID,
@@ -39,7 +39,7 @@ int updateBufHitCountAry(
   return 0;
 }
 
-void delBufHitCountAry(BufHitCountAry_T *bufHitCountAry)
+void delBufHitCountAry(BufHitCountAry *bufHitCountAry)
 {
   assert(bufHitCountAry);
   free(*bufHitCountAry);
@@ -48,7 +48,7 @@ void delBufHitCountAry(BufHitCountAry_T *bufHitCountAry)
 }
 
 void statBufHitCountArray(
-    BufHitCountAry_T bufHitCountAry,
+    BufHitCountAry bufHitCountAry,
     u32 numBuf,
     u32 byteThreashold)
 {
@@ -67,7 +67,7 @@ void statBufHitCountArray(
 }
 
 void printBufHitCountAry(
-    BufHitCountAry_T bufHitCountAry,
+    BufHitCountAry bufHitCountAry,
     u32 numBuf)
 {
   for(size_t r = 0; r < numBuf; r++) {
@@ -76,4 +76,27 @@ void printBufHitCountAry(
       printf("2D buf hit count array[%zu][%zu]:%u\n", r, c, val);
     }
   }
+}
+
+/* ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
+ * Buffer hit count array context functions.
+ * ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** */
+
+BufHitCountAryCtxt *
+newBufHitCountAryCtxt(BufHitCountAry bufHitCountAry, u32 numBuf)
+{
+  BufHitCountAryCtxt *bufHitCountAryCtxt = calloc(1, sizeof(BufHitCountAryCtxt) );
+  assert(bufHitCountAryCtxt);
+
+  bufHitCountAryCtxt->bufHitCountAry = bufHitCountAry;
+  bufHitCountAryCtxt->numBuf = numBuf;
+
+  return bufHitCountAryCtxt;
+}
+
+void delBufHitCountAryCtxt(BufHitCountAryCtxt **bufHitCountAryCtxt)
+{
+  free(*bufHitCountAryCtxt);
+  *bufHitCountAryCtxt = NULL;
+  printf("del buf hit count array context:%p\n", *bufHitCountAryCtxt);
 }
