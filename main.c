@@ -59,9 +59,14 @@ int main(int argc, char const *argv[])
         BufHitCountAryCtxt *tpmBufHitCountAryCtxt = newBufHitCountAryCtxt(
                                                     tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
 
+        // Update 2D hit count buffer array
+        OperationCtxt *octxt = createOperationCtxt(UPDATE_BUF_HIT_CNT_ARY,
+                                                    tpmBufHitCountAryCtxt);
+
         for(int i = 0; i < numTPMSrcNode; i++) {
           // printMemNodeLit(aryTPMSrcNode[i]);
-          tpmTraverse(aryTPMSrcNode[i], tpmBufHitCountAryCtxt);
+          // tpmTraverse(aryTPMSrcNode[i], tpmBufHitCountAryCtxt);
+          tpmTraverse(aryTPMSrcNode[i], octxt);
         }
 
         printBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
@@ -69,6 +74,8 @@ int main(int argc, char const *argv[])
 
         delBufHitCountAry(&tpmBufHitCountAry);
         delBufHitCountAryCtxt(&tpmBufHitCountAryCtxt);
+
+        delOperationCtxt(octxt);
 
         delTPMSrcNode(aryTPMSrcNode);
 

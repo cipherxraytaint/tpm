@@ -35,12 +35,39 @@ static void
 dfs_traverseChildrenTrans(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
 
 
+/* operation function */
+static void
+dfsTrans_operation(TPMNode2 *srcNode, Stack *stack, void *operationCtxt);
+
 /* update buffer hit count array */
 static void
 dfsNode_updateBufHitCountAry(Stack *stack, void *operationCtxt);
 
 static void
 dfsTrans_updateBufHitCountAry(TPMNode2 *srcNode, Stack *stack, void *operationCtxt);
+
+/* ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+ * public functions
+ * ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+ */
+OperationCtxt *
+createOperationCtxt(enum OperateType ot, void *ctxt)
+{
+  OperationCtxt *octx = calloc(1, sizeof(OperationCtxt) );
+  assert(octx);
+
+  octx->ot = ot;
+  octx->ctxt = ctxt;
+
+  return octx;
+}
+
+void
+delOperationCtxt(OperationCtxt *operationCtxt)
+{
+  if(operationCtxt != NULL)
+    free(operationCtxt);
+}
 
 void
 tpmTraverse(
@@ -175,7 +202,8 @@ dfs_tpmTraverseTrans(TPMNode2 *srcNode, void *operationCtxt)
         stackPush(memTransStack, topTrans );
         // Transition *trans = stackPeek(memTransStack);
         // printMemNodeLit( &(trans->child->tpmnode2) );
-        dfsTrans_updateBufHitCountAry(srcNode, memTransStack, operationCtxt);
+        // dfsTrans_updateBufHitCountAry(srcNode, memTransStack, operationCtxt);
+        dfsTrans_operation(srcNode, memTransStack, operationCtxt);
       }
 
       topTrans->hasVisit = (u32)srcNode; // use the src node ptr val as
@@ -218,6 +246,16 @@ dfs_traverseChildrenTrans(TPMNode2 *srcNode, TPMNode *farther, Stack *stack)
     firstChild = firstChild->next;
   }
 }
+
+/* determine perform which operations */
+static void
+dfsTrans_operation(TPMNode2 *srcNode, Stack *stack, void *operationCtxt)
+{
+  OperationCtxt *oCtxt = (OperationCtxt *)operationCtxt;
+  if(oCtxt->ot == UPDATE_BUF_HIT_CNT_ARY)
+    dfsTrans_updateBufHitCountAry(srcNode, stack, oCtxt->ctxt);
+}
+
 
 /* ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
  * update buffer hit count array related
