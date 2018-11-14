@@ -37,6 +37,19 @@ createOperationCtxt(enum OperateType ot, void *ctxt);
 void
 delOperationCtxt(OperationCtxt *operationCtxt);
 
+/* ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+ * TPM traversing related.
+ * ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+ */
+
+/*
+ * Traverse the whole tpm given a memory type source node. Clear all (currently
+ * transitions) visited flag (set to 0).
+ *  @srcNode:
+ *   the source memory node starts traversing
+ */
+void clearTPMVisitFlag(TPMNode2 *srcNode);
+
 /*
  * Traverse the whole tpm based on a memory type source node and perform
  * needed operations.

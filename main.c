@@ -72,6 +72,11 @@ int main(int argc, char const *argv[])
         printBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
         statBufHitCountArray(tpmBufHitCountAry, tpmBufCtxt->numOfBuf, 64);
 
+        // Clear TPM transition visit flags
+        for(int i = 0; i < numTPMSrcNode; i++) {
+          clearTPMVisitFlag(aryTPMSrcNode[i]);
+        }
+
         // Write propagate info (2lvl hash) to files
         octxt->ot = WRITE_2LVL_HASH;
         for(int i = 0; i < numTPMSrcNode; i++) {

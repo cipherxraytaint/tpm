@@ -34,7 +34,12 @@ dfs_isVisitTrans(TPMNode2 *srcNode, u32 visitTransIdx);
 static void
 dfs_traverseChildrenTrans(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
 
-/* operation function
+/* dfs clear transition visit flags */
+static void
+dfs_tpmClearTrans(TPMNode2 *srcNode);
+
+/*
+ * operation function
  *   determines which operations to perform.
  */
 static void
@@ -73,6 +78,13 @@ delOperationCtxt(OperationCtxt *operationCtxt)
   if(operationCtxt != NULL)
     free(operationCtxt);
 }
+
+void
+clearTPMVisitFlag(TPMNode2 *srcNode)
+{
+  dfs_tpmClearTrans(srcNode);
+}
+
 
 void
 tpmTraverse(
@@ -250,6 +262,33 @@ dfs_traverseChildrenTrans(TPMNode2 *srcNode, TPMNode *farther, Stack *stack)
     }
     firstChild = firstChild->next;
   }
+}
+
+static void
+dfs_tpmClearTrans(TPMNode2 *srcNode)
+{
+  Stack *transStack = stackNew(); // transition stack for tpm
+
+  Transition *first = srcNode->firstChild;
+  while(first != NULL) {
+    stackPush(transStack, first);
+    first = first->next;
+  }
+
+  while(!stackEmpty(transStack) ) {
+    Transition *topTrans = (Transition *)stackPop(transStack); // pop directly
+    topTrans->hasVisit = 0;
+
+    TPMNode *topNode = topTrans->child;
+    Transition *firstChild = topNode->tpmnode1.firstChild;
+    while(firstChild != NULL) {
+      if(firstChild->hasVisit != 0 ) {
+        stackPush(transStack, firstChild);
+      }
+      firstChild = firstChild->next;
+    }
+  }
+  stackDel(transStack);
 }
 
 /* determine perform which operations */
