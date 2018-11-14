@@ -34,8 +34,9 @@ dfs_isVisitTrans(TPMNode2 *srcNode, u32 visitTransIdx);
 static void
 dfs_traverseChildrenTrans(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
 
-
-/* operation function */
+/* operation function
+ *   determines which operations to perform.
+ */
 static void
 dfsTrans_operation(TPMNode2 *srcNode, Stack *stack, void *operationCtxt);
 
@@ -45,6 +46,10 @@ dfsNode_updateBufHitCountAry(Stack *stack, void *operationCtxt);
 
 static void
 dfsTrans_updateBufHitCountAry(TPMNode2 *srcNode, Stack *stack, void *operationCtxt);
+
+/* write propgate info to 2 level hash files */
+static void
+dfsTrans_write2LvlHashFile(TPMNode2 *srcNode, Stack *stack, void *w2LvlHashFileCtxt);
 
 /* ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
  * public functions
@@ -254,6 +259,12 @@ dfsTrans_operation(TPMNode2 *srcNode, Stack *stack, void *operationCtxt)
   OperationCtxt *oCtxt = (OperationCtxt *)operationCtxt;
   if(oCtxt->ot == UPDATE_BUF_HIT_CNT_ARY)
     dfsTrans_updateBufHitCountAry(srcNode, stack, oCtxt->ctxt);
+  else if(oCtxt->ot == WRITE_2LVL_HASH)
+    dfsTrans_write2LvlHashFile(srcNode, stack, oCtxt->ctxt);
+  else{
+    fprintf(stderr, "unknown operation types\n");
+    abort();
+  }
 }
 
 
@@ -348,4 +359,10 @@ updateSrcNode:
           srcBufIdx, dstBufIdx, dstNode->bytesz);
     }
   }
+}
+
+static void
+dfsTrans_write2LvlHashFile(TPMNode2 *srcNode, Stack *stack, void *w2LvlHashFileCtxt)
+{
+  printf("write proopagte info to 2 lvl hash files\n");
 }
