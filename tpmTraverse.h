@@ -13,6 +13,44 @@
 #include "tpmnode.h"
 
 /*
+ * Operation types
+ */
+enum OperateType {
+  UPDATE_BUF_HIT_CNT_ARY,   // update 2D buffer hit count array
+  WRITE_2LVL_HASH,          // write propagation (2 level hash) to files
+};
+
+/*
+ * Store operation context information. There might be multi-type operations
+ * performed in tpm traversing. Use operation context to differenciate which
+ * operations to perform.
+ */
+typedef struct OperationCtxt_
+{
+  enum OperateType ot;  // operation type
+  void *ctxt;           // Specific context
+} OperationCtxt;
+
+OperationCtxt *
+createOperationCtxt(enum OperateType ot, void *ctxt);
+
+void
+delOperationCtxt(OperationCtxt *operationCtxt);
+
+/* ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+ * TPM traversing related.
+ * ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+ */
+
+/*
+ * Traverse the whole tpm given a memory type source node. Clear all (currently
+ * transitions) visited flag (set to 0).
+ *  @srcNode:
+ *   the source memory node starts traversing
+ */
+void clearTPMVisitFlag(TPMNode2 *srcNode);
+
+/*
  * Traverse the whole tpm based on a memory type source node and perform
  * needed operations.
  *  @srcNode:

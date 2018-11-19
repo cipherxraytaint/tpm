@@ -34,6 +34,16 @@ dfs_isVisitTrans(TPMNode2 *srcNode, u32 visitTransIdx);
 static void
 dfs_traverseChildrenTrans(TPMNode2 *srcNode, TPMNode *farther, Stack *stack);
 
+/* dfs clear transition visit flags */
+static void
+dfs_tpmClearTrans(TPMNode2 *srcNode);
+
+/*
+ * operation function
+ *   determines which operations to perform.
+ */
+static void
+dfsTrans_operation(TPMNode2 *srcNode, Stack *stack, void *operationCtxt);
 
 /* update buffer hit count array */
 static void
@@ -41,6 +51,40 @@ dfsNode_updateBufHitCountAry(Stack *stack, void *operationCtxt);
 
 static void
 dfsTrans_updateBufHitCountAry(TPMNode2 *srcNode, Stack *stack, void *operationCtxt);
+
+/* write propgate info to 2 level hash files */
+static void
+dfsTrans_write2LvlHashFile(TPMNode2 *srcNode, Stack *stack, void *w2LvlHashFileCtxt);
+
+/* ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+ * public functions
+ * ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+ */
+OperationCtxt *
+createOperationCtxt(enum OperateType ot, void *ctxt)
+{
+  OperationCtxt *octx = calloc(1, sizeof(OperationCtxt) );
+  assert(octx);
+
+  octx->ot = ot;
+  octx->ctxt = ctxt;
+
+  return octx;
+}
+
+void
+delOperationCtxt(OperationCtxt *operationCtxt)
+{
+  if(operationCtxt != NULL)
+    free(operationCtxt);
+}
+
+void
+clearTPMVisitFlag(TPMNode2 *srcNode)
+{
+  dfs_tpmClearTrans(srcNode);
+}
+
 
 void
 tpmTraverse(
@@ -175,7 +219,8 @@ dfs_tpmTraverseTrans(TPMNode2 *srcNode, void *operationCtxt)
         stackPush(memTransStack, topTrans );
         // Transition *trans = stackPeek(memTransStack);
         // printMemNodeLit( &(trans->child->tpmnode2) );
-        dfsTrans_updateBufHitCountAry(srcNode, memTransStack, operationCtxt);
+        // dfsTrans_updateBufHitCountAry(srcNode, memTransStack, operationCtxt);
+        dfsTrans_operation(srcNode, memTransStack, operationCtxt);
       }
 
       topTrans->hasVisit = (u32)srcNode; // use the src node ptr val as
@@ -218,6 +263,49 @@ dfs_traverseChildrenTrans(TPMNode2 *srcNode, TPMNode *farther, Stack *stack)
     firstChild = firstChild->next;
   }
 }
+
+static void
+dfs_tpmClearTrans(TPMNode2 *srcNode)
+{
+  Stack *transStack = stackNew(); // transition stack for tpm
+
+  Transition *first = srcNode->firstChild;
+  while(first != NULL) {
+    stackPush(transStack, first);
+    first = first->next;
+  }
+
+  while(!stackEmpty(transStack) ) {
+    Transition *topTrans = (Transition *)stackPop(transStack); // pop directly
+    topTrans->hasVisit = 0;
+
+    TPMNode *topNode = topTrans->child;
+    Transition *firstChild = topNode->tpmnode1.firstChild;
+    while(firstChild != NULL) {
+      if(firstChild->hasVisit != 0 ) {
+        stackPush(transStack, firstChild);
+      }
+      firstChild = firstChild->next;
+    }
+  }
+  stackDel(transStack);
+}
+
+/* determine perform which operations */
+static void
+dfsTrans_operation(TPMNode2 *srcNode, Stack *stack, void *operationCtxt)
+{
+  OperationCtxt *oCtxt = (OperationCtxt *)operationCtxt;
+  if(oCtxt->ot == UPDATE_BUF_HIT_CNT_ARY)
+    dfsTrans_updateBufHitCountAry(srcNode, stack, oCtxt->ctxt);
+  else if(oCtxt->ot == WRITE_2LVL_HASH)
+    dfsTrans_write2LvlHashFile(srcNode, stack, oCtxt->ctxt);
+  else{
+    fprintf(stderr, "unknown operation types\n");
+    abort();
+  }
+}
+
 
 /* ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
  * update buffer hit count array related
@@ -310,4 +398,10 @@ updateSrcNode:
           srcBufIdx, dstBufIdx, dstNode->bytesz);
     }
   }
+}
+
+static void
+dfsTrans_write2LvlHashFile(TPMNode2 *srcNode, Stack *stack, void *w2LvlHashFileCtxt)
+{
+  printf("write proopagte info to 2 lvl hash files\n");
 }
