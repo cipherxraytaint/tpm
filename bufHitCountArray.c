@@ -66,6 +66,17 @@ void statBufHitCountArray(
 
 }
 
+void clearBufHitCountAry(
+    BufHitCountAry bufHitCountAry,
+    u32 numBuf)
+{
+  for(size_t r = 0; r < numBuf; r++) {
+    for (size_t c = 0; c < numBuf; c++) {
+      bufHitCountAry[r*numBuf + c] = 0;
+    }
+  }
+}
+
 void printBufHitCountAry(
     BufHitCountAry bufHitCountAry,
     u32 numBuf)

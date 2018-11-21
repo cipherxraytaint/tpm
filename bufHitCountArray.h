@@ -66,6 +66,10 @@ extern void statBufHitCountArray(
     u32 numBuf,
     u32 byteThreashold);
 
+extern void clearBufHitCountAry(
+    BufHitCountAry bufHitCountAry,
+    u32 numBuf);
+
 extern void printBufHitCountAry(
     BufHitCountAry bufHitCountAry,
     u32 numBuf);
