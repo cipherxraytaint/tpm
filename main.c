@@ -77,11 +77,25 @@ int main(int argc, char const *argv[])
           clearTPMVisitFlag(aryTPMSrcNode[i]);
         }
 
-        // Write propagate info (2lvl hash) to files
-        octxt->ot = WRITE_2LVL_HASH;
+        //DBG: verify clear TPM transition flag via re-update the 2D hit count buffer
+        // array again.
+        clearBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
+        // printBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
+        printf("verify clear transition flag, re-update 2D hit count buf aray\n");
         for(int i = 0; i < numTPMSrcNode; i++) {
+          // printMemNodeLit(aryTPMSrcNode[i]);
+          // tpmTraverse(aryTPMSrcNode[i], tpmBufHitCountAryCtxt);
           tpmTraverse(aryTPMSrcNode[i], octxt);
         }
+
+        printBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
+        statBufHitCountArray(tpmBufHitCountAry, tpmBufCtxt->numOfBuf, 64);
+
+        // Write propagate info (2lvl hash) to files
+//        octxt->ot = WRITE_2LVL_HASH;
+//        for(int i = 0; i < numTPMSrcNode; i++) {
+//          tpmTraverse(aryTPMSrcNode[i], octxt);
+//        }
 
         delBufHitCountAry(&tpmBufHitCountAry);
         delBufHitCountAryCtxt(&tpmBufHitCountAryCtxt);
