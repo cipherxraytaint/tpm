@@ -306,7 +306,6 @@ dfsTrans_operation(TPMNode2 *srcNode, Stack *stack, void *operationCtxt)
   }
 }
 
-
 /* ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** *****
  * update buffer hit count array related
  * ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** ***** */
@@ -400,8 +399,74 @@ updateSrcNode:
   }
 }
 
+/*
+ * Writes <src node, dst node> pairs into files.
+ *  @srcNode
+ *   the src node of the tpm traversing
+ *  @stack
+ *   contains intermediate nodes used as source nodes
+ *  @w2LvlHashFileCtxt
+ *   context information
+ *
+ *  src node candidates:
+ *   1. srcNode
+ *   2. intermediate node except the last one
+ *  dst node:
+ *   last node in the stack
+ */
 static void
 dfsTrans_write2LvlHashFile(TPMNode2 *srcNode, Stack *stack, void *w2LvlHashFileCtxt)
 {
-  printf("write proopagte info to 2 lvl hash files\n");
+//  printf("write propagate info to 2 lvl hash files\n");
+  if(stackEmpty(stack))
+    return;
+
+  Transition *dstTrans = (Transition *)stackPeek(stack); // dst trans is last elet in stack
+  TPMNode2 *dstNode = &(dstTrans->child->tpmnode2);
+
+  if(stackSize(stack) <= 1)
+    goto wSrcDstPair;
+
+  // ----- ----- ----- -----
+  // handles intermediate src nodes
+  // ----- ----- ----- -----
+  StackElet *topElet = stackTop(stack);
+  StackElet *srcElet = stackNextElet(topElet); // intermediate src starts from
+                                               // last second elet in stack
+
+  while(srcElet != NULL) {
+    Transition *intermediateSrcTrans = (Transition *)stackGetElet(srcElet);
+    if(!dfs_isVisitTrans(srcNode, intermediateSrcTrans->hasVisit) ) { // if the trans
+      // had been visited during the traversing, it had been written to files already
+
+      TPMNode2 * intermediateSrcNode = &(intermediateSrcTrans->child->tpmnode2);
+      if(!areSameBuffer(intermediateSrcNode, dstNode) ) {
+        printf("----- \nwrite <src,dst> into file:\n");
+        printf("src:\t");
+        printMemNodeLit(srcNode);
+        printf("dst:\t");
+        printMemNodeLit(dstNode);
+
+        // Temporary
+        if(intermediateSrcNode->bufid > 0 && dstNode->bufid > 0) {
+        }
+      }
+    }
+    srcElet = stackNextElet(srcElet);
+  }
+
+  // ----- ----- ----- -----
+  // handles srcNode
+  // ----- ----- ----- -----
+wSrcDstPair:
+  // stack doesn't include the source node to the dst node, adds it here
+  if(!areSameBuffer(srcNode, dstNode) ) {
+    printf("----- \nwrite <src,dst> into file:\n");
+    printf("src:\t");
+    printMemNodeLit(srcNode);
+    printf("dst:\t");
+    printMemNodeLit(dstNode);
+    if(srcNode->bufid > 0 && dstNode->bufid > 0) {
+    }
+  }
 }
