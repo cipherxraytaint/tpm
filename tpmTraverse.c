@@ -7,6 +7,7 @@
 
 #include <assert.h>
 #include <stdbool.h>
+#include "dataToFile.h"
 #include "tpmTraverse.h"
 #include "stack.h"
 #include "tpm.h"
@@ -55,6 +56,13 @@ dfsTrans_updateBufHitCountAry(TPMNode2 *srcNode, Stack *stack, void *operationCt
 /* write propgate info to 2 level hash files */
 static void
 dfsTrans_write2LvlHashFile(TPMNode2 *srcNode, Stack *stack, void *w2LvlHashFileCtxt);
+
+static bool isValidHitCount(
+    BufHitCountAry bufHitCountAry,
+    u32 numBuf,
+    u32 srcBufID,
+    u32 dstBufID,
+    u8 hitCountThreash);
 
 /* ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
  * public functions
@@ -421,6 +429,9 @@ dfsTrans_write2LvlHashFile(TPMNode2 *srcNode, Stack *stack, void *w2LvlHashFileC
   if(stackEmpty(stack))
     return;
 
+  Data2FileCtxt *data2FlCtxt = (Data2FileCtxt *)w2LvlHashFileCtxt;
+  BufHitCountAryCtxt *bufHitCountAryCtxt = data2FlCtxt->bufHitCntAryCtxt;
+
   Transition *dstTrans = (Transition *)stackPeek(stack); // dst trans is last elet in stack
   TPMNode2 *dstNode = &(dstTrans->child->tpmnode2);
 
@@ -441,14 +452,19 @@ dfsTrans_write2LvlHashFile(TPMNode2 *srcNode, Stack *stack, void *w2LvlHashFileC
 
       TPMNode2 * intermediateSrcNode = &(intermediateSrcTrans->child->tpmnode2);
       if(!areSameBuffer(intermediateSrcNode, dstNode) ) {
-        printf("----- \nwrite <src,dst> into file:\n");
-        printf("src:\t");
-        printMemNodeLit(srcNode);
-        printf("dst:\t");
-        printMemNodeLit(dstNode);
-
         // Temporary
         if(intermediateSrcNode->bufid > 0 && dstNode->bufid > 0) {
+          u32 srcBufIdx = intermediateSrcNode->bufid - 1;
+          u32 dstBufIdx = dstNode->bufid - 1;
+
+          if(isValidHitCount(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
+                            srcBufIdx, dstBufIdx, 64) ) {
+            printf("----- \nwrite <src,dst> into file:\n");
+            printf("src:\t");
+            printMemNodeLit(srcNode);
+            printf("dst:\t");
+            printMemNodeLit(dstNode);
+          }
         }
       }
     }
@@ -461,12 +477,38 @@ dfsTrans_write2LvlHashFile(TPMNode2 *srcNode, Stack *stack, void *w2LvlHashFileC
 wSrcDstPair:
   // stack doesn't include the source node to the dst node, adds it here
   if(!areSameBuffer(srcNode, dstNode) ) {
-    printf("----- \nwrite <src,dst> into file:\n");
-    printf("src:\t");
-    printMemNodeLit(srcNode);
-    printf("dst:\t");
-    printMemNodeLit(dstNode);
     if(srcNode->bufid > 0 && dstNode->bufid > 0) {
+      u32 srcBufIdx = srcNode->bufid - 1;
+      u32 dstBufIdx = dstNode->bufid - 1;
+
+      if(isValidHitCount(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
+          srcBufIdx, dstBufIdx, 64) ) {
+        printf("----- \nwrite <src,dst> into file:\n");
+        printf("src:\t");
+        printMemNodeLit(srcNode);
+        printf("dst:\t");
+        printMemNodeLit(dstNode);
+      }
     }
   }
+}
+
+
+static bool
+isValidHitCount(
+    BufHitCountAry bufHitCountAry,
+    u32 numBuf,
+    u32 srcBufID,
+    u32 dstBufID,
+    u8 hitCountThreash)
+{
+  if(bufHitCountAry == NULL ||
+      srcBufID >= numBuf ||
+      dstBufID >= numBuf)
+    return false;
+
+  if(bufHitCountAry[srcBufID*numBuf + dstBufID] >= hitCountThreash)
+    return true;
+  else
+    return false;
 }

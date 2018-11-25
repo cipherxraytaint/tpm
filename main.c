@@ -3,6 +3,7 @@
 #include "avalanche.h"
 #include "bufhitcnt.h"
 #include "bufHitCountArray.h" // hit count buffer array for tpm
+#include "dataToFile.h"
 #include "env.h"
 #include "hitmap.h"
 #include "hitmapavalanche.h"
@@ -100,13 +101,19 @@ int main(int argc, char const *argv[])
         // ----- ----- ----- ----- ----- -----
         // Write propagate info (2lvl hash) to files
         // ----- ----- ----- ----- ----- -----
+        Data2FileCtxt *data2FlCtxt = newData2FileCtxt(tpmBufHitCountAryCtxt);
+
         octxt->ot = WRITE_2LVL_HASH;
+        octxt->ctxt = data2FlCtxt;
+
         for(int i = 0; i < numTPMSrcNode; i++) {
           tpmTraverse(aryTPMSrcNode[i], octxt);
         }
 
         delBufHitCountAry(&tpmBufHitCountAry);
         delBufHitCountAryCtxt(&tpmBufHitCountAryCtxt);
+
+        delData2FileCtxt(data2FlCtxt);
 
         delOperationCtxt(octxt);
 
