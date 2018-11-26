@@ -53,6 +53,7 @@ int main(int argc, char const *argv[])
 
         tpmBufCtxt = initTPMBufContext(tpm); // analyze tpm buffers (could use for HitMap)
 
+        u32 numValidPair  = 0; // num of valid(>64) 2D hit count buffer pairs
         u32 numTPMSrcNode = 0;
         TPMNode2 **aryTPMSrcNode = getTPMSrcNode(tpmBufCtxt, &numTPMSrcNode);
 
@@ -73,7 +74,13 @@ int main(int argc, char const *argv[])
         }
 
         printBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
-        statBufHitCountArray(tpmBufHitCountAry, tpmBufCtxt->numOfBuf, 64);
+        numValidPair = statBufHitCountArray(tpmBufHitCountAry, tpmBufCtxt->numOfBuf, 64);
+//        printf("----------\nnum of buf pair hitcnt > %u bytes:%u \n", 64, numValidPair);
+        if(numValidPair == 0) {
+          printf("----------\nnum of buf pair hitcnt > %u bytes:%u, no valid buffer pair, exit \n",
+                64, numValidPair);
+          goto FINDETECT;
+        }
 
         // Clear TPM transition visit flags
         for(int i = 0; i < numTPMSrcNode; i++) {
@@ -101,19 +108,19 @@ int main(int argc, char const *argv[])
         // ----- ----- ----- ----- ----- -----
         // Write propagate info (2lvl hash) to files
         // ----- ----- ----- ----- ----- -----
-        Data2FileCtxt *data2FlCtxt = newData2FileCtxt(tpmBufHitCountAryCtxt);
+//        Data2FileCtxt *data2FlCtxt = newData2FileCtxt(tpmBufHitCountAryCtxt);
+//
+//        octxt->ot = WRITE_2LVL_HASH;
+//        octxt->ctxt = data2FlCtxt;
+//
+//        for(int i = 0; i < numTPMSrcNode; i++) {
+//          tpmTraverse(aryTPMSrcNode[i], octxt);
+//        }
+//        delData2FileCtxt(data2FlCtxt);
 
-        octxt->ot = WRITE_2LVL_HASH;
-        octxt->ctxt = data2FlCtxt;
-
-        for(int i = 0; i < numTPMSrcNode; i++) {
-          tpmTraverse(aryTPMSrcNode[i], octxt);
-        }
-
+FINDETECT: // Finish detecting avalanche
         delBufHitCountAry(&tpmBufHitCountAry);
         delBufHitCountAryCtxt(&tpmBufHitCountAryCtxt);
-
-        delData2FileCtxt(data2FlCtxt);
 
         delOperationCtxt(octxt);
 
