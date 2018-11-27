@@ -64,6 +64,12 @@ static bool isValidHitCount(
     u32 dstBufID,
     u8 hitCountThreash);
 
+static void
+writeBufPair2File(
+    Data2FileCtxt *data2FlCtxt,
+    TPMNode2 *srcNode,
+    TPMNode2 *dstNode);
+
 /* ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
  * public functions
  * ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
@@ -451,22 +457,7 @@ dfsTrans_write2LvlHashFile(TPMNode2 *srcNode, Stack *stack, void *w2LvlHashFileC
       // had been visited during the traversing, it had been written to files already
 
       TPMNode2 * intermediateSrcNode = &(intermediateSrcTrans->child->tpmnode2);
-      if(!areSameBuffer(intermediateSrcNode, dstNode) ) {
-        // Temporary
-        if(intermediateSrcNode->bufid > 0 && dstNode->bufid > 0) {
-          u32 srcBufIdx = intermediateSrcNode->bufid - 1;
-          u32 dstBufIdx = dstNode->bufid - 1;
-
-          if(isValidHitCount(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
-                            srcBufIdx, dstBufIdx, 64) ) {
-            printf("----- \nwrite <src,dst> into file:\n");
-            printf("src:\t");
-            printMemNodeLit(srcNode);
-            printf("dst:\t");
-            printMemNodeLit(dstNode);
-          }
-        }
-      }
+      writeBufPair2File(data2FlCtxt, intermediateSrcNode, dstNode);
     }
     srcElet = stackNextElet(srcElet);
   }
@@ -476,21 +467,7 @@ dfsTrans_write2LvlHashFile(TPMNode2 *srcNode, Stack *stack, void *w2LvlHashFileC
   // ----- ----- ----- -----
 wSrcDstPair:
   // stack doesn't include the source node to the dst node, adds it here
-  if(!areSameBuffer(srcNode, dstNode) ) {
-    if(srcNode->bufid > 0 && dstNode->bufid > 0) {
-      u32 srcBufIdx = srcNode->bufid - 1;
-      u32 dstBufIdx = dstNode->bufid - 1;
-
-      if(isValidHitCount(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
-          srcBufIdx, dstBufIdx, 64) ) {
-        printf("----- \nwrite <src,dst> into file:\n");
-        printf("src:\t");
-        printMemNodeLit(srcNode);
-        printf("dst:\t");
-        printMemNodeLit(dstNode);
-      }
-    }
-  }
+  writeBufPair2File(data2FlCtxt, srcNode, dstNode);
 }
 
 
@@ -511,4 +488,46 @@ isValidHitCount(
     return true;
   else
     return false;
+}
+
+static void
+writeBufPair2File(
+    Data2FileCtxt *data2FlCtxt,
+    TPMNode2 *srcNode,
+    TPMNode2 *dstNode)
+{
+  BufHitCountAryCtxt *bufHitCountAryCtxt = data2FlCtxt->bufHitCntAryCtxt;
+  BufPair2FileHashItem *findSrc = NULL;
+  BufPair2FileHashItem *findDst = NULL;
+
+  if(!areSameBuffer(srcNode, dstNode) ) {
+    if(srcNode->bufid > 0 && dstNode->bufid > 0) {
+      // Temporary
+      u32 srcBufIdx = srcNode->bufid - 1;
+      u32 dstBufIdx = dstNode->bufid - 1;
+
+      if(isValidHitCount(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
+          srcBufIdx, dstBufIdx, 64) ) {
+        printf("----- \nwrite <src,dst> into file:\n");
+        printf("src:\t");
+        printMemNodeLit(srcNode);
+        printf("dst:\t");
+        printMemNodeLit(dstNode);
+
+        findSrc = findBufPair2FileItem(data2FlCtxt->bufPair2FileHashHead, srcNode->bufid);
+        if(findSrc) { // found src buf hash
+          findDst = findBufPair2FileItem(data2FlCtxt->bufPair2FileHashHead->subHash, dstNode->bufid);
+          if(findDst) {
+
+          }
+          else {
+            printf("could not find dst buf hash\n");
+          }
+        }
+        else {
+          printf("could not find src buf hash\n");
+        }
+      }
+    }
+  }
 }

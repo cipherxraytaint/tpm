@@ -108,15 +108,15 @@ int main(int argc, char const *argv[])
         // ----- ----- ----- ----- ----- -----
         // Write propagate info (2lvl hash) to files
         // ----- ----- ----- ----- ----- -----
-//        Data2FileCtxt *data2FlCtxt = newData2FileCtxt(tpmBufHitCountAryCtxt);
-//
-//        octxt->ot = WRITE_2LVL_HASH;
-//        octxt->ctxt = data2FlCtxt;
-//
-//        for(int i = 0; i < numTPMSrcNode; i++) {
-//          tpmTraverse(aryTPMSrcNode[i], octxt);
-//        }
-//        delData2FileCtxt(data2FlCtxt);
+        Data2FileCtxt *data2FlCtxt = newData2FileCtxt(tpmBufHitCountAryCtxt);
+
+        octxt->ot = WRITE_2LVL_HASH;
+        octxt->ctxt = data2FlCtxt;
+
+        for(int i = 0; i < numTPMSrcNode; i++) {
+          tpmTraverse(aryTPMSrcNode[i], octxt);
+        }
+        delData2FileCtxt(data2FlCtxt);
 
 FINDETECT: // Finish detecting avalanche
         delBufHitCountAry(&tpmBufHitCountAry);
@@ -163,7 +163,6 @@ FINDETECT: // Finish detecting avalanche
         delHitMapBufHitCnt(hitMap);
         delHitMapBufContext(hitMap->hitMapBufCtxt);
         delHitMap(hitMap);
-
 
         // searchAllAvalancheInTPM(tpm);
         delTPM(tpm);

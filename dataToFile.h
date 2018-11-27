@@ -8,15 +8,7 @@
 
 #include <stdio.h>  // FILE
 #include "bufHitCountArray.h"
-
-/*
- * Data to file context:
- *  contains context info to write <src,dst> propagation pair
- *  into files.
- */
-typedef struct Data2FileCtxt_{
-  BufHitCountAryCtxt *bufHitCntAryCtxt;
-} Data2FileCtxt;
+#include "uthash.h"
 
 /*
  * Two level hash table to file ptr
@@ -32,6 +24,16 @@ typedef struct BufPair2FileHashItem_
   UT_hash_handle hh_bufPair2File;  // makes this structure hashable
 } BufPair2FileHashItem;
 
+/*
+ * Data to file context:
+ *  contains context info to write <src,dst> propagation pair
+ *  into files.
+ */
+typedef struct Data2FileCtxt_{
+  BufHitCountAryCtxt *bufHitCntAryCtxt;
+  BufPair2FileHashItem *bufPair2FileHashHead;
+} Data2FileCtxt;
+
 Data2FileCtxt *
 newData2FileCtxt(BufHitCountAryCtxt *bufHitCntAryCtxt);
 
@@ -43,5 +45,11 @@ newBufPair2FileHashItem(u32 bufID, BufPair2FileHashItem *subHash, FILE *fl);
 
 void
 delBufPair2FileHashItem(BufPair2FileHashItem *bufPair2FileHashItem);
+
+/*
+ * Find the BufPair2FileHashItem if it's in hash table
+ */
+BufPair2FileHashItem *
+findBufPair2FileItem(BufPair2FileHashItem *head, u32 bufID);
 
 #endif /* DATATOFILE_H_ */
