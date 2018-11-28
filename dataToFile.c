@@ -51,6 +51,6 @@ BufPair2FileHashItem *
 findBufPair2FileItem(BufPair2FileHashItem *head, u32 bufID)
 {
   BufPair2FileHashItem *find = NULL;
-  HASH_FIND(hh_bufPair2File, head, &bufID, 4, find);
+  HASH_FIND(hh_bufPair2FileItem, head, &bufID, 4, find);
   return find;
 }

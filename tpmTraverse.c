@@ -53,7 +53,7 @@ dfsNode_updateBufHitCountAry(Stack *stack, void *operationCtxt);
 static void
 dfsTrans_updateBufHitCountAry(TPMNode2 *srcNode, Stack *stack, void *operationCtxt);
 
-/* write propgate info to 2 level hash files */
+/* write propagate info <src node, dst node> to 2 level hash files */
 static void
 dfsTrans_write2LvlHashFile(TPMNode2 *srcNode, Stack *stack, void *w2LvlHashFileCtxt);
 
@@ -69,6 +69,12 @@ writeBufPair2File(
     Data2FileCtxt *data2FlCtxt,
     TPMNode2 *srcNode,
     TPMNode2 *dstNode);
+
+static FILE *
+findBufPair2File(
+    Data2FileCtxt *data2FlCtxt,
+    u32 srcBufID,
+    u32 dstBufID);
 
 /* ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
  * public functions
@@ -497,37 +503,63 @@ writeBufPair2File(
     TPMNode2 *dstNode)
 {
   BufHitCountAryCtxt *bufHitCountAryCtxt = data2FlCtxt->bufHitCntAryCtxt;
-  BufPair2FileHashItem *findSrc = NULL;
-  BufPair2FileHashItem *findDst = NULL;
 
-  if(!areSameBuffer(srcNode, dstNode) ) {
-    if(srcNode->bufid > 0 && dstNode->bufid > 0) {
+  if(!areSameBuffer(srcNode, dstNode) ) // should be in diff bufs
+  {
+    if(srcNode->bufid > 0 && dstNode->bufid > 0) // valid buf ID(>0)
+    {
       // Temporary
       u32 srcBufIdx = srcNode->bufid - 1;
       u32 dstBufIdx = dstNode->bufid - 1;
 
       if(isValidHitCount(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
-          srcBufIdx, dstBufIdx, 64) ) {
-        printf("----- \nwrite <src,dst> into file:\n");
-        printf("src:\t");
-        printMemNodeLit(srcNode);
-        printf("dst:\t");
-        printMemNodeLit(dstNode);
+                         srcBufIdx, dstBufIdx, 64) ) // valid hit count threashold
+      {
+//        printf("----- \nwrite <src,dst> into file:\nsrc:\t");
+//        printMemNodeLit(srcNode);
+//        printf("dst:\t");
+//        printMemNodeLit(dstNode);
 
-        findSrc = findBufPair2FileItem(data2FlCtxt->bufPair2FileHashHead, srcNode->bufid);
-        if(findSrc) { // found src buf hash
-          findDst = findBufPair2FileItem(data2FlCtxt->bufPair2FileHashHead->subHash, dstNode->bufid);
-          if(findDst) {
-
-          }
-          else {
-            printf("could not find dst buf hash\n");
-          }
-        }
-        else {
-          printf("could not find src buf hash\n");
-        }
+        findBufPair2File(data2FlCtxt, srcNode->bufid, dstNode->bufid);
       }
     }
+  }
+}
+
+static FILE *
+findBufPair2File(
+    Data2FileCtxt *data2FlCtxt,
+    u32 srcBufID,
+    u32 dstBufID)
+{
+  BufPair2FileHashItem *findSrc = NULL;
+  BufPair2FileHashItem *findDst = NULL;
+
+  findSrc = findBufPair2FileItem(data2FlCtxt->bufPair2FileHashHead, srcBufID);
+  if(findSrc)
+  { // found src buf hash
+    findDst = findBufPair2FileItem(data2FlCtxt->bufPair2FileHashHead->subHash, dstBufID);
+    if(findDst)
+    { // found dst buf hash
+      printf("find <%u %u> pair file handler:%p\n", srcBufID, dstBufID, findDst->fl);
+      return findDst->fl;
+    }
+    else {
+      printf("could not find dst buf:%u hash\n", dstBufID);
+      BufPair2FileHashItem *dstHashItem = newBufPair2FileHashItem(dstBufID, NULL, NULL);
+      HASH_ADD(hh_bufPair2FileItem,findSrc->subHash,bufID,4,dstHashItem);
+      return dstHashItem->fl;
+    }
+  }
+  else {
+    printf("could not find src buf:%u hash\n", srcBufID);
+    // creates src hash items
+    BufPair2FileHashItem *srcHashItem = newBufPair2FileHashItem(srcBufID, NULL, NULL);
+    HASH_ADD(hh_bufPair2FileItem,data2FlCtxt->bufPair2FileHashHead, bufID, 4, srcHashItem);
+
+    BufPair2FileHashItem *dstHashItem = newBufPair2FileHashItem(dstBufID, NULL, NULL);
+    HASH_ADD(hh_bufPair2FileItem,srcHashItem->subHash,bufID,4,dstHashItem);
+
+    return dstHashItem->fl;
   }
 }

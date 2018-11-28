@@ -21,7 +21,7 @@ typedef struct BufPair2FileHashItem_
   u32 bufID; // Used as key to hash: src buf ID in 1st level; dst buf ID in 2nd level
   struct BufPair2FileHashItem_ *subHash; // next level hash
   FILE *fl; // the file ptr the <src buf ID, dst buf ID> points to
-  UT_hash_handle hh_bufPair2File;  // makes this structure hashable
+  UT_hash_handle hh_bufPair2FileItem;  // makes this structure hashable
 } BufPair2FileHashItem;
 
 /*
