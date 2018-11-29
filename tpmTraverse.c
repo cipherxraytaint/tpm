@@ -520,7 +520,7 @@ writeBufPair2File(
 //        printf("dst:\t");
 //        printMemNodeLit(dstNode);
 
-        findBufPair2File(data2FlCtxt, srcNode->bufid, dstNode->bufid);
+        FILE *fl = findBufPair2File(data2FlCtxt, srcNode->bufid, dstNode->bufid);
       }
     }
   }

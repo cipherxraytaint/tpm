@@ -44,7 +44,13 @@ BufPair2FileHashItem *
 newBufPair2FileHashItem(u32 bufID, BufPair2FileHashItem *subHash, FILE *fl);
 
 void
-delBufPair2FileHashItem(BufPair2FileHashItem *bufPair2FileHashItem);
+delBufPair2FileHashItem(BufPair2FileHashItem *head, BufPair2FileHashItem *bufPair2FileHashItem);
+
+/*
+ * Del all buf pair to file items.
+ */
+void
+delBufPair2FileHash(BufPair2FileHashItem *head);
 
 /*
  * Find the BufPair2FileHashItem if it's in hash table

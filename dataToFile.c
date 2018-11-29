@@ -42,9 +42,28 @@ newBufPair2FileHashItem(u32 bufID, BufPair2FileHashItem *subHash, FILE *fl)
 }
 
 void
-delBufPair2FileHashItem(BufPair2FileHashItem *bufPair2FileHashItem)
+delBufPair2FileHashItem(BufPair2FileHashItem *head, BufPair2FileHashItem *bufPair2FileHashItem)
 {
-  // TODO
+  if(head && bufPair2FileHashItem) {
+    HASH_DELETE(hh_bufPair2FileItem,head,bufPair2FileHashItem);
+    free(bufPair2FileHashItem);
+  }
+}
+
+void
+delBufPair2FileHash(BufPair2FileHashItem *head)
+{
+  BufPair2FileHashItem *del, *tmp;
+  HASH_ITER(hh_bufPair2FileItem, head, del, tmp) {
+    // Del sub hash
+    BufPair2FileHashItem *subDel, *subTmp;
+    HASH_ITER(hh_bufPair2FileItem, del->subHash, subDel, subTmp) {
+      delBufPair2FileHashItem(del->subHash, subDel);
+    }
+
+    delBufPair2FileHashItem(head, del);
+  }
+  printf("del buf pair 2 file two level hash table\n");
 }
 
 BufPair2FileHashItem *

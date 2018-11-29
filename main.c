@@ -116,6 +116,8 @@ int main(int argc, char const *argv[])
         for(int i = 0; i < numTPMSrcNode; i++) {
           tpmTraverse(aryTPMSrcNode[i], octxt);
         }
+
+        delBufPair2FileHash(data2FlCtxt->bufPair2FileHashHead);
         delData2FileCtxt(data2FlCtxt);
 
 FINDETECT: // Finish detecting avalanche
