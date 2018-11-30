@@ -8,6 +8,13 @@
 #include <stdio.h>
 #include "dataToFile.h"
 
+static void
+newFileName(char *fileName, u32 srcBufID, u32 dstBufID);
+
+/* ----- ----- ----- ----- ----- ----- ----- -----
+ * Public function
+ * ----- ----- ----- ----- ----- ----- ----- ----- */
+
 Data2FileCtxt *
 newData2FileCtxt(BufHitCountAryCtxt *bufHitCntAryCtxt)
 {
@@ -27,6 +34,10 @@ delData2FileCtxt(Data2FileCtxt *data2FlCtxt)
     free(data2FlCtxt);
   printf("del data to file context\n");
 }
+
+/* ----- ----- ----- ----- ----- ----- ----- -----
+ * Buf pair to file hash
+ * ----- ----- ----- ----- ----- ----- ----- ----- */
 
 BufPair2FileHashItem *
 newBufPair2FileHashItem(u32 bufID, BufPair2FileHashItem *subHash, FILE *fl)
@@ -72,4 +83,41 @@ findBufPair2FileItem(BufPair2FileHashItem *head, u32 bufID)
   BufPair2FileHashItem *find = NULL;
   HASH_FIND(hh_bufPair2FileItem, head, &bufID, 4, find);
   return find;
+}
+
+FILE *newFile(u32 srcBufID, u32 dstBufID)
+{
+  char fn[MAX_FILENAME_LEN] = {0};
+  newFileName(fn, srcBufID, dstBufID);
+  printf("file name:%s\n", fn);
+
+  FILE *fl = fopen(fn,"wb");
+  assert(fl);
+
+  return fl;
+}
+
+void closeBufPairFile(BufPair2FileHashItem *head)
+{
+  BufPair2FileHashItem *it, *tmp;
+
+  HASH_ITER(hh_bufPair2FileItem, head, it, tmp) {
+    BufPair2FileHashItem *sub_it, *subTmp;
+
+    HASH_ITER(hh_bufPair2FileItem, it->subHash, sub_it, subTmp) {
+      if(sub_it->fl)
+        fclose(sub_it->fl);
+    }
+  }
+  printf("close buf pair 2 files\n");
+}
+
+/* ----- ----- ----- ----- ----- ----- ----- -----
+ * static function
+ * ----- ----- ----- ----- ----- ----- ----- ----- */
+
+static void
+newFileName(char *fileName, u32 srcBufID, u32 dstBufID)
+{
+  sprintf(fileName, "%d_%d", srcBufID, dstBufID);
 }

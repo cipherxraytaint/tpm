@@ -10,6 +10,8 @@
 #include "bufHitCountArray.h"
 #include "uthash.h"
 
+#define MAX_FILENAME_LEN    128
+
 /*
  * Two level hash table to file ptr
  *  1) src buf ID as 1st level hash
@@ -40,6 +42,10 @@ newData2FileCtxt(BufHitCountAryCtxt *bufHitCntAryCtxt);
 void
 delData2FileCtxt(Data2FileCtxt *data2FlCtxt);
 
+/* ----- ----- ----- ----- ----- ----- ----- -----
+ * Buf pair to file hash
+ * ----- ----- ----- ----- ----- ----- ----- ----- */
+
 BufPair2FileHashItem *
 newBufPair2FileHashItem(u32 bufID, BufPair2FileHashItem *subHash, FILE *fl);
 
@@ -57,5 +63,13 @@ delBufPair2FileHash(BufPair2FileHashItem *head);
  */
 BufPair2FileHashItem *
 findBufPair2FileItem(BufPair2FileHashItem *head, u32 bufID);
+
+/* ----- ----- ----- ----- ----- ----- ----- -----
+ * File related
+ * ----- ----- ----- ----- ----- ----- ----- ----- */
+
+FILE *newFile(u32 srcBufID, u32 dstBufID);
+
+void closeBufPairFile(BufPair2FileHashItem *head);
 
 #endif /* DATATOFILE_H_ */

@@ -117,6 +117,7 @@ int main(int argc, char const *argv[])
           tpmTraverse(aryTPMSrcNode[i], octxt);
         }
 
+        closeBufPairFile(data2FlCtxt->bufPair2FileHashHead);
         delBufPair2FileHash(data2FlCtxt->bufPair2FileHashHead);
         delData2FileCtxt(data2FlCtxt);
 

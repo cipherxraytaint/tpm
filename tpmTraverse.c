@@ -534,6 +534,7 @@ findBufPair2File(
 {
   BufPair2FileHashItem *findSrc = NULL;
   BufPair2FileHashItem *findDst = NULL;
+  FILE *fl = NULL; // if created
 
   findSrc = findBufPair2FileItem(data2FlCtxt->bufPair2FileHashHead, srcBufID);
   if(findSrc)
@@ -541,12 +542,13 @@ findBufPair2File(
     findDst = findBufPair2FileItem(data2FlCtxt->bufPair2FileHashHead->subHash, dstBufID);
     if(findDst)
     { // found dst buf hash
-      printf("find <%u %u> pair file handler:%p\n", srcBufID, dstBufID, findDst->fl);
+//      printf("find <%u %u> pair file handler:%p\n", srcBufID, dstBufID, findDst->fl);
       return findDst->fl;
     }
     else {
       printf("could not find dst buf:%u hash\n", dstBufID);
-      BufPair2FileHashItem *dstHashItem = newBufPair2FileHashItem(dstBufID, NULL, NULL);
+      fl = newFile(srcBufID, dstBufID);
+      BufPair2FileHashItem *dstHashItem = newBufPair2FileHashItem(dstBufID, NULL, fl);
       HASH_ADD(hh_bufPair2FileItem,findSrc->subHash,bufID,4,dstHashItem);
       return dstHashItem->fl;
     }
@@ -557,7 +559,8 @@ findBufPair2File(
     BufPair2FileHashItem *srcHashItem = newBufPair2FileHashItem(srcBufID, NULL, NULL);
     HASH_ADD(hh_bufPair2FileItem,data2FlCtxt->bufPair2FileHashHead, bufID, 4, srcHashItem);
 
-    BufPair2FileHashItem *dstHashItem = newBufPair2FileHashItem(dstBufID, NULL, NULL);
+    fl = newFile(srcBufID, dstBufID);
+    BufPair2FileHashItem *dstHashItem = newBufPair2FileHashItem(dstBufID, NULL, fl);
     HASH_ADD(hh_bufPair2FileItem,srcHashItem->subHash,bufID,4,dstHashItem);
 
     return dstHashItem->fl;
