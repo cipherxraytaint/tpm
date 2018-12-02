@@ -36,6 +36,19 @@ typedef struct Data2FileCtxt_{
   BufPair2FileHashItem *bufPair2FileHashHead;
 } Data2FileCtxt;
 
+/*
+ * <src version node, dst version node> content write to file
+ */
+typedef struct PropagatePair_ {
+  u32 srcAddr;
+  u32 srcVal;
+  u32 dstAddr;
+  u32 dstVal;
+} PropagatePair ;
+
+
+/* Function prototype */
+
 Data2FileCtxt *
 newData2FileCtxt(BufHitCountAryCtxt *bufHitCntAryCtxt);
 
@@ -71,5 +84,14 @@ findBufPair2FileItem(BufPair2FileHashItem *head, u32 bufID);
 FILE *newFile(u32 srcBufID, u32 dstBufID);
 
 void closeBufPairFile(BufPair2FileHashItem *head);
+
+PropagatePair *
+newPropagatePair(u32 srcAddr, u32 srcVal, u32 dstAddr, u32 dstVal);
+
+void
+delPropagatePair(PropagatePair **pp);
+
+void
+printPropagatePair(PropagatePair *pp);
 
 #endif /* DATATOFILE_H_ */

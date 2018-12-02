@@ -515,12 +515,18 @@ writeBufPair2File(
       if(isValidHitCount(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
                          srcBufIdx, dstBufIdx, 64) ) // valid hit count threashold
       {
-//        printf("----- \nwrite <src,dst> into file:\nsrc:\t");
-//        printMemNodeLit(srcNode);
-//        printf("dst:\t");
-//        printMemNodeLit(dstNode);
+        printf("----- \nwrite <src,dst> into file:\nsrc:\t");
+        printMemNodeLit(srcNode);
+        printf("dst:\t");
+        printMemNodeLit(dstNode);
 
         FILE *fl = findBufPair2File(data2FlCtxt, srcNode->bufid, dstNode->bufid);
+        PropagatePair *pp = newPropagatePair(srcNode->addr, srcNode->val,
+                                              dstNode->addr, dstNode->val);
+        if(fwrite(pp, sizeof(PropagatePair), 1, fl) < 0) {
+          fprintf("error write propagate pair to files\n");
+        }
+        delPropagatePair(&pp);
       }
     }
   }

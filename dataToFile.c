@@ -112,6 +112,38 @@ void closeBufPairFile(BufPair2FileHashItem *head)
   printf("close buf pair 2 files\n");
 }
 
+
+PropagatePair *
+newPropagatePair(u32 srcAddr, u32 srcVal, u32 dstAddr, u32 dstVal)
+{
+  PropagatePair *pp = calloc(1, sizeof(PropagatePair));
+  assert(pp != NULL);
+
+  pp->srcAddr   = srcAddr;
+  pp->srcVal    = srcVal;
+  pp->dstAddr   = dstAddr;
+  pp->dstVal    = dstVal;
+
+  return pp;
+}
+
+void delPropagatePair(PropagatePair **pp)
+{
+  assert(pp != NULL);
+  if(*pp != NULL) {
+    free(*pp);
+    *pp = NULL;
+  }
+}
+
+void
+printPropagatePair(PropagatePair *pp)
+{
+  if(pp)
+    printf("propagatepair: srcAddr:%u - srcVal:%u - dstAddr:%u - dstVal:%u\n",
+           pp->srcAddr, pp->srcVal, pp->dstAddr, pp->dstVal);
+}
+
 /* ----- ----- ----- ----- ----- ----- ----- -----
  * static function
  * ----- ----- ----- ----- ----- ----- ----- ----- */
@@ -121,3 +153,4 @@ newFileName(char *fileName, u32 srcBufID, u32 dstBufID)
 {
   sprintf(fileName, "%d_%d", srcBufID, dstBufID);
 }
+
