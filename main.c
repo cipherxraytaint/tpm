@@ -3,6 +3,7 @@
 #include "avalanche.h"
 #include "bufhitcnt.h"
 #include "bufHitCountArray.h" // hit count buffer array for tpm
+#include "dataToFile.h"
 #include "env.h"
 #include "hitmap.h"
 #include "hitmapavalanche.h"
@@ -52,6 +53,7 @@ int main(int argc, char const *argv[])
 
         tpmBufCtxt = initTPMBufContext(tpm); // analyze tpm buffers (could use for HitMap)
 
+        u32 numValidPair  = 0; // num of valid(>64) 2D hit count buffer pairs
         u32 numTPMSrcNode = 0;
         TPMNode2 **aryTPMSrcNode = getTPMSrcNode(tpmBufCtxt, &numTPMSrcNode);
 
@@ -59,7 +61,9 @@ int main(int argc, char const *argv[])
         BufHitCountAryCtxt *tpmBufHitCountAryCtxt = newBufHitCountAryCtxt(
                                                     tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
 
+        // ----- ----- ----- ----- ----- -----
         // Update 2D hit count buffer array
+        // ----- ----- ----- ----- ----- -----
         OperationCtxt *octxt = createOperationCtxt(UPDATE_BUF_HIT_CNT_ARY,
                                                     tpmBufHitCountAryCtxt);
 
@@ -70,15 +74,25 @@ int main(int argc, char const *argv[])
         }
 
         printBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
-        statBufHitCountArray(tpmBufHitCountAry, tpmBufCtxt->numOfBuf, 64);
+        numValidPair = statBufHitCountArray(tpmBufHitCountAry, tpmBufCtxt->numOfBuf, 64);
+//        printf("----------\nnum of buf pair hitcnt > %u bytes:%u \n", 64, numValidPair);
+        if(numValidPair == 0) {
+          printf("----------\nnum of buf pair hitcnt > %u bytes:%u, no valid buffer pair, exit \n",
+                64, numValidPair);
+          goto FINDETECT;
+        }
 
         // Clear TPM transition visit flags
         for(int i = 0; i < numTPMSrcNode; i++) {
           clearTPMVisitFlag(aryTPMSrcNode[i]);
         }
 
-        //DBG: verify clear TPM transition flag via re-update the 2D hit count buffer
+        // ----- ----- ----- ----- ----- -----
+        //DEBUG:
+        // verify clear TPM transition flag via re-update the 2D hit count buffer
         // array again.
+        // ----- ----- ----- ----- ----- -----
+#if 0
         clearBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
         // printBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
         printf("verify clear transition flag, re-update 2D hit count buf aray\n");
@@ -87,16 +101,27 @@ int main(int argc, char const *argv[])
           // tpmTraverse(aryTPMSrcNode[i], tpmBufHitCountAryCtxt);
           tpmTraverse(aryTPMSrcNode[i], octxt);
         }
-
         printBufHitCountAry(tpmBufHitCountAry, tpmBufCtxt->numOfBuf);
         statBufHitCountArray(tpmBufHitCountAry, tpmBufCtxt->numOfBuf, 64);
+#endif
 
+        // ----- ----- ----- ----- ----- -----
         // Write propagate info (2lvl hash) to files
-//        octxt->ot = WRITE_2LVL_HASH;
-//        for(int i = 0; i < numTPMSrcNode; i++) {
-//          tpmTraverse(aryTPMSrcNode[i], octxt);
-//        }
+        // ----- ----- ----- ----- ----- -----
+        Data2FileCtxt *data2FlCtxt = newData2FileCtxt(tpmBufHitCountAryCtxt, tpmBufCtxt);
 
+        octxt->ot = WRITE_2LVL_HASH;
+        octxt->ctxt = data2FlCtxt;
+
+        for(int i = 0; i < numTPMSrcNode; i++) {
+          tpmTraverse(aryTPMSrcNode[i], octxt);
+        }
+
+        closeBufPairFile(data2FlCtxt->bufPair2FileHashHead);
+        delBufPair2FileHash(data2FlCtxt->bufPair2FileHashHead);
+        delData2FileCtxt(data2FlCtxt);
+
+FINDETECT: // Finish detecting avalanche
         delBufHitCountAry(&tpmBufHitCountAry);
         delBufHitCountAryCtxt(&tpmBufHitCountAryCtxt);
 
@@ -107,7 +132,6 @@ int main(int argc, char const *argv[])
         /* 10/2/18
          * Changed the design, no need to build HitMap any more
          */
-
 
         hitMap = buildHitMap(tpm, tpmBufCtxt);   // TODO: flag forward or reverse build
         // print_hitmap_source(hitMap);
@@ -142,7 +166,6 @@ int main(int argc, char const *argv[])
         delHitMapBufHitCnt(hitMap);
         delHitMapBufContext(hitMap->hitMapBufCtxt);
         delHitMap(hitMap);
-
 
         // searchAllAvalancheInTPM(tpm);
         delTPM(tpm);
