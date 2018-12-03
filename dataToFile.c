@@ -16,13 +16,17 @@ newFileName(char *fileName, u32 srcBufID, u32 dstBufID);
  * ----- ----- ----- ----- ----- ----- ----- ----- */
 
 Data2FileCtxt *
-newData2FileCtxt(BufHitCountAryCtxt *bufHitCntAryCtxt)
+newData2FileCtxt(
+    BufHitCountAryCtxt *bufHitCntAryCtxt,
+    TPMBufContext *tpmBufCtxt)
 {
   Data2FileCtxt *data2FlCtxt = calloc(1, sizeof(Data2FileCtxt) );
   assert(data2FlCtxt);
 
   data2FlCtxt->bufHitCntAryCtxt = bufHitCntAryCtxt;
   data2FlCtxt->bufPair2FileHashHead = NULL;
+  data2FlCtxt->tpmBufCtxt = tpmBufCtxt;
+
   return data2FlCtxt;
 }
 
@@ -112,6 +116,29 @@ void closeBufPairFile(BufPair2FileHashItem *head)
   printf("close buf pair 2 files\n");
 }
 
+BufHeadInfo *newBufHeadInfo(
+    u32 srcBufBegin,
+    u32 srcBufEnd,
+    u32 dstBufBegin,
+    u32 dstBufEnd)
+{
+  BufHeadInfo *bh = calloc(1, sizeof(BufHeadInfo) );
+  assert(bh);
+
+  bh->srcBufBegin = srcBufBegin;
+  bh->srcBufEnd = srcBufEnd;
+  bh->dstBufBegin = dstBufBegin;
+  bh->dstBufEnd = dstBufEnd;
+
+  return bh;
+}
+
+void
+delBufHeadInfo(BufHeadInfo *bufHeadInfo)
+{
+  if(bufHeadInfo)
+    free(bufHeadInfo);
+}
 
 PropagatePair *
 newPropagatePair(u32 srcAddr, u32 srcVal, u32 dstAddr, u32 dstVal)

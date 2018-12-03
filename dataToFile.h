@@ -8,6 +8,7 @@
 
 #include <stdio.h>  // FILE
 #include "bufHitCountArray.h"
+#include "tpm.h"
 #include "uthash.h"
 
 #define MAX_FILENAME_LEN    128
@@ -34,7 +35,18 @@ typedef struct BufPair2FileHashItem_
 typedef struct Data2FileCtxt_{
   BufHitCountAryCtxt *bufHitCntAryCtxt;
   BufPair2FileHashItem *bufPair2FileHashHead;
+  TPMBufContext *tpmBufCtxt;
 } Data2FileCtxt;
+
+/*
+ * Buf head information
+ */
+typedef struct BufHeadInfo_ {
+  u32 srcBufBegin;
+  u32 srcBufEnd;
+  u32 dstBufBegin;
+  u32 dstBufEnd;
+} BufHeadInfo;
 
 /*
  * <src version node, dst version node> content write to file
@@ -50,7 +62,9 @@ typedef struct PropagatePair_ {
 /* Function prototype */
 
 Data2FileCtxt *
-newData2FileCtxt(BufHitCountAryCtxt *bufHitCntAryCtxt);
+newData2FileCtxt(
+    BufHitCountAryCtxt *bufHitCntAryCtxt,
+    TPMBufContext *tpmBufCtxt);
 
 void
 delData2FileCtxt(Data2FileCtxt *data2FlCtxt);
@@ -84,6 +98,15 @@ findBufPair2FileItem(BufPair2FileHashItem *head, u32 bufID);
 FILE *newFile(u32 srcBufID, u32 dstBufID);
 
 void closeBufPairFile(BufPair2FileHashItem *head);
+
+BufHeadInfo *newBufHeadInfo(
+    u32 srcBufBegin,
+    u32 srcBufEnd,
+    u32 dstBufBegin,
+    u32 dstBufEnd);
+
+void
+delBufHeadInfo(BufHeadInfo *bufHeadInfo);
 
 PropagatePair *
 newPropagatePair(u32 srcAddr, u32 srcVal, u32 dstAddr, u32 dstVal);

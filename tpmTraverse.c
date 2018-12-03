@@ -76,6 +76,13 @@ findBufPair2File(
     u32 srcBufID,
     u32 dstBufID);
 
+static void
+writeBufHeadInfo(
+    FILE *fl,
+    Data2FileCtxt *data2FlCtxt,
+    u32 srcBufID,
+    u32 dstBufID);
+
 /* ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
  * public functions
  * ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
@@ -515,16 +522,16 @@ writeBufPair2File(
       if(isValidHitCount(bufHitCountAryCtxt->bufHitCountAry, bufHitCountAryCtxt->numBuf,
                          srcBufIdx, dstBufIdx, 64) ) // valid hit count threashold
       {
-        printf("----- \nwrite <src,dst> into file:\nsrc:\t");
-        printMemNodeLit(srcNode);
-        printf("dst:\t");
-        printMemNodeLit(dstNode);
+//        printf("----- \nwrite <src,dst> into file:\nsrc:\t");
+//        printMemNodeLit(srcNode);
+//        printf("dst:\t");
+//        printMemNodeLit(dstNode);
 
         FILE *fl = findBufPair2File(data2FlCtxt, srcNode->bufid, dstNode->bufid);
         PropagatePair *pp = newPropagatePair(srcNode->addr, srcNode->val,
                                               dstNode->addr, dstNode->val);
         if(fwrite(pp, sizeof(PropagatePair), 1, fl) < 0) {
-          fprintf("error write propagate pair to files\n");
+          fprintf(stderr, "error write propagate pair to files\n");
         }
         delPropagatePair(&pp);
       }
@@ -556,6 +563,8 @@ findBufPair2File(
       fl = newFile(srcBufID, dstBufID);
       BufPair2FileHashItem *dstHashItem = newBufPair2FileHashItem(dstBufID, NULL, fl);
       HASH_ADD(hh_bufPair2FileItem,findSrc->subHash,bufID,4,dstHashItem);
+
+      writeBufHeadInfo(fl, data2FlCtxt, srcBufID, dstBufID);
       return dstHashItem->fl;
     }
   }
@@ -569,6 +578,31 @@ findBufPair2File(
     BufPair2FileHashItem *dstHashItem = newBufPair2FileHashItem(dstBufID, NULL, fl);
     HASH_ADD(hh_bufPair2FileItem,srcHashItem->subHash,bufID,4,dstHashItem);
 
+    writeBufHeadInfo(fl, data2FlCtxt, srcBufID, dstBufID); // write buf head info to file
     return dstHashItem->fl;
   }
+}
+
+static void
+writeBufHeadInfo(
+    FILE *fl,
+    Data2FileCtxt *data2FlCtxt,
+    u32 srcBufID,
+    u32 dstBufID)
+{
+  TPMBufHashTable *src, *dst;
+  src = getTPMBuf(data2FlCtxt->tpmBufCtxt->tpmBufHash, srcBufID-1);
+  dst = getTPMBuf(data2FlCtxt->tpmBufCtxt->tpmBufHash, dstBufID-1);
+
+  assert(src->headNode->bufid == srcBufID);
+  assert(dst->headNode->bufid == dstBufID);
+
+//  print1TPMBufHashTable("src", src);
+//  print1TPMBufHashTable("dst", dst);
+
+  BufHeadInfo *bh = newBufHeadInfo(src->baddr, src->eaddr, dst->baddr, dst->eaddr);
+  if(fwrite(bh, sizeof(BufHeadInfo), 1, fl) < 0) {
+    fprintf(stderr, "error write buf head info to files\n");
+  }
+  delBufHeadInfo(bh);
 }

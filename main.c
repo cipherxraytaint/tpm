@@ -108,7 +108,7 @@ int main(int argc, char const *argv[])
         // ----- ----- ----- ----- ----- -----
         // Write propagate info (2lvl hash) to files
         // ----- ----- ----- ----- ----- -----
-        Data2FileCtxt *data2FlCtxt = newData2FileCtxt(tpmBufHitCountAryCtxt);
+        Data2FileCtxt *data2FlCtxt = newData2FileCtxt(tpmBufHitCountAryCtxt, tpmBufCtxt);
 
         octxt->ot = WRITE_2LVL_HASH;
         octxt->ctxt = data2FlCtxt;
