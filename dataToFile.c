@@ -141,15 +141,23 @@ delBufHeadInfo(BufHeadInfo *bufHeadInfo)
 }
 
 PropagatePair *
-newPropagatePair(u32 srcAddr, u32 srcVal, u32 dstAddr, u32 dstVal)
+newPropagatePair(
+//    u32 srcAddr,
+//    u32 srcVal,
+//    u32 dstAddr,
+//    u32 dstVal,
+    TPMNode2 *src_ptr,
+    TPMNode2 *dst_ptr)
 {
   PropagatePair *pp = calloc(1, sizeof(PropagatePair));
   assert(pp != NULL);
 
-  pp->srcAddr   = srcAddr;
-  pp->srcVal    = srcVal;
-  pp->dstAddr   = dstAddr;
-  pp->dstVal    = dstVal;
+//  pp->srcAddr   = srcAddr;
+//  pp->srcVal    = srcVal;
+//  pp->dstAddr   = dstAddr;
+//  pp->dstVal    = dstVal;
+  pp->src_tr = src_ptr;
+  pp->dst_ptr = dst_ptr;
 
   return pp;
 }
@@ -166,9 +174,11 @@ void delPropagatePair(PropagatePair **pp)
 void
 printPropagatePair(PropagatePair *pp)
 {
-  if(pp)
-    printf("propagatepair: srcAddr:%u - srcVal:%u - dstAddr:%u - dstVal:%u\n",
-           pp->srcAddr, pp->srcVal, pp->dstAddr, pp->dstVal);
+  if(pp) {
+//    printf("propagatepair: srcAddr:%u - srcVal:%u - dstAddr:%u - dstVal:%u\n",
+//           pp->srcAddr, pp->srcVal, pp->dstAddr, pp->dstVal);
+    printf("propagatepair:srcptr:%p - dstptr:%p\n",pp->src_tr, pp->dst_ptr);
+  }
 }
 
 /* ----- ----- ----- ----- ----- ----- ----- -----

@@ -528,8 +528,11 @@ writeBufPair2File(
 //        printMemNodeLit(dstNode);
 
         FILE *fl = findBufPair2File(data2FlCtxt, srcNode->bufid, dstNode->bufid);
-        PropagatePair *pp = newPropagatePair(srcNode->addr, srcNode->val,
-                                              dstNode->addr, dstNode->val);
+//        PropagatePair *pp = newPropagatePair(srcNode->addr, srcNode->val,
+//                                              dstNode->addr, dstNode->val);
+        PropagatePair *pp = newPropagatePair(srcNode, dstNode);
+//        printPropagatePair(pp);
+
         if(fwrite(pp, sizeof(PropagatePair), 1, fl) < 0) {
           fprintf(stderr, "error write propagate pair to files\n");
         }

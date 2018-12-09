@@ -52,10 +52,17 @@ typedef struct BufHeadInfo_ {
  * <src version node, dst version node> content write to file
  */
 typedef struct PropagatePair_ {
-  u32 srcAddr;
-  u32 srcVal;
-  u32 dstAddr;
-  u32 dstVal;
+//  u32 srcAddr;
+//  u8  srcSz;
+//  u32 srcVer;
+//  u32 srcVal;
+//  u32 dstAddr;
+//  u8  dstSz;
+//  u32 dstVer;
+//  u32 dstVal;
+  TPMNode2 *src_tr; // src node tpm ptr
+  TPMNode2 *dst_ptr;// dst node tpm ptr
+
 } PropagatePair ;
 
 
@@ -109,7 +116,13 @@ void
 delBufHeadInfo(BufHeadInfo *bufHeadInfo);
 
 PropagatePair *
-newPropagatePair(u32 srcAddr, u32 srcVal, u32 dstAddr, u32 dstVal);
+newPropagatePair(
+//    u32 srcAddr,
+//    u32 srcVal,
+//    u32 dstAddr,
+//    u32 dstVal,
+    TPMNode2 *src_ptr,
+    TPMNode2 *dst_ptr);
 
 void
 delPropagatePair(PropagatePair **pp);
