@@ -95,7 +95,7 @@ FILE *newFile(u32 srcBufID, u32 dstBufID)
   newFileName(fn, srcBufID, dstBufID);
   printf("file name:%s\n", fn);
 
-  FILE *fl = fopen(fn,"wb");
+  FILE *fl = fopen(fn,"rwb");
   assert(fl);
 
   return fl;
@@ -114,6 +114,30 @@ void closeBufPairFile(BufPair2FileHashItem *head)
     }
   }
   printf("close buf pair 2 files\n");
+}
+
+void readBufPairFile(FILE *fl)
+{
+  rewind(fl);
+  BufHeadInfo *bh = newBufHeadInfo(0,0,0,0);
+  PropagatePair *pp = newPropagatePair(NULL,NULL);
+
+  // Read buf head info
+  if(fread(bh,sizeof(BufHeadInfo),1,fl) < 0) {
+    fprintf(stderr, "error read buf head info from file\n");
+    goto EXIT;
+  }
+  printBufHeadInfo(bh);
+
+  // Read <src node, dst node> propagate
+  int nread = 0;
+  while((nread = fread(pp, sizeof(PropagatePair), 1, fl) ) > 0) {
+    printPropagatePair(pp);
+  }
+
+EXIT:
+  delBufHeadInfo(bh);
+  delPropagatePair(&pp);
 }
 
 BufHeadInfo *newBufHeadInfo(
@@ -168,6 +192,15 @@ void delPropagatePair(PropagatePair **pp)
   if(*pp != NULL) {
     free(*pp);
     *pp = NULL;
+  }
+}
+
+void
+printBufHeadInfo(BufHeadInfo *bh)
+{
+  if(bh) {
+    printf("Buf head: srcBufB:0x%x srcBufE:0x%x - dstBufB:0x%x dstBufE:0x%x\n",
+            bh->srcBufBegin,bh->srcBufEnd,bh->dstBufBegin,bh->dstBufEnd);
   }
 }
 

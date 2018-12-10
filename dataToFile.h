@@ -106,6 +106,11 @@ FILE *newFile(u32 srcBufID, u32 dstBufID);
 
 void closeBufPairFile(BufPair2FileHashItem *head);
 
+/*
+ * Read the buf pair propagate info
+ */
+void readBufPairFile(FILE *fl);
+
 BufHeadInfo *newBufHeadInfo(
     u32 srcBufBegin,
     u32 srcBufEnd,
@@ -126,6 +131,9 @@ newPropagatePair(
 
 void
 delPropagatePair(PropagatePair **pp);
+
+void
+printBufHeadInfo(BufHeadInfo *bh);
 
 void
 printPropagatePair(PropagatePair *pp);
