@@ -95,7 +95,7 @@ FILE *newFile(u32 srcBufID, u32 dstBufID)
   newFileName(fn, srcBufID, dstBufID);
   printf("file name:%s\n", fn);
 
-  FILE *fl = fopen(fn,"rwb");
+  FILE *fl = fopen(fn,"w+b");
   assert(fl);
 
   return fl;
@@ -119,7 +119,7 @@ void closeBufPairFile(BufPair2FileHashItem *head)
 void readBufPairFile(FILE *fl)
 {
   rewind(fl);
-  BufHeadInfo *bh = newBufHeadInfo(0,0,0,0);
+  BufHeadInfo *bh = newBufHeadInfo(NULL,NULL);
   PropagatePair *pp = newPropagatePair(NULL,NULL);
 
   // Read buf head info
@@ -141,19 +141,23 @@ EXIT:
 }
 
 BufHeadInfo *newBufHeadInfo(
-    u32 srcBufBegin,
-    u32 srcBufEnd,
-    u32 dstBufBegin,
-    u32 dstBufEnd)
+//    u32 srcBufBegin,
+//    u32 srcBufEnd,
+//    u32 dstBufBegin,
+//    u32 dstBufEnd,
+    TPMBufHashTable *srcBuf,
+    TPMBufHashTable *dstBuf)
 {
   BufHeadInfo *bh = calloc(1, sizeof(BufHeadInfo) );
   assert(bh);
 
-  bh->srcBufBegin = srcBufBegin;
-  bh->srcBufEnd = srcBufEnd;
-  bh->dstBufBegin = dstBufBegin;
-  bh->dstBufEnd = dstBufEnd;
+//  bh->srcBufBegin = srcBufBegin;
+//  bh->srcBufEnd = srcBufEnd;
+//  bh->dstBufBegin = dstBufBegin;
+//  bh->dstBufEnd = dstBufEnd;
 
+  bh->srcBuf = srcBuf;
+  bh->dstBuf = dstBuf;
   return bh;
 }
 
@@ -199,8 +203,10 @@ void
 printBufHeadInfo(BufHeadInfo *bh)
 {
   if(bh) {
-    printf("Buf head: srcBufB:0x%x srcBufE:0x%x - dstBufB:0x%x dstBufE:0x%x\n",
-            bh->srcBufBegin,bh->srcBufEnd,bh->dstBufBegin,bh->dstBufEnd);
+//    printf("Buf head: srcBufB:0x%x srcBufE:0x%x - dstBufB:0x%x dstBufE:0x%x\n",
+//            bh->srcBufBegin,bh->srcBufEnd,bh->dstBufBegin,bh->dstBufEnd);
+    printf("Buf head: srcBuf:%p - dstBuf:%p\n",
+            bh->srcBuf,bh->dstBuf);
   }
 }
 

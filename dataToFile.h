@@ -42,10 +42,12 @@ typedef struct Data2FileCtxt_{
  * Buf head information
  */
 typedef struct BufHeadInfo_ {
-  u32 srcBufBegin;
-  u32 srcBufEnd;
-  u32 dstBufBegin;
-  u32 dstBufEnd;
+//  u32 srcBufBegin;
+//  u32 srcBufEnd;
+//  u32 dstBufBegin;
+//  u32 dstBufEnd;
+  TPMBufHashTable *srcBuf;
+  TPMBufHashTable *dstBuf;
 } BufHeadInfo;
 
 /*
@@ -112,10 +114,12 @@ void closeBufPairFile(BufPair2FileHashItem *head);
 void readBufPairFile(FILE *fl);
 
 BufHeadInfo *newBufHeadInfo(
-    u32 srcBufBegin,
-    u32 srcBufEnd,
-    u32 dstBufBegin,
-    u32 dstBufEnd);
+//    u32 srcBufBegin,
+//    u32 srcBufEnd,
+//    u32 dstBufBegin,
+//    u32 dstBufEnd,
+    TPMBufHashTable *srcBuf,
+    TPMBufHashTable *dstBuf);
 
 void
 delBufHeadInfo(BufHeadInfo *bufHeadInfo);

@@ -603,7 +603,8 @@ writeBufHeadInfo(
 //  print1TPMBufHashTable("src", src);
 //  print1TPMBufHashTable("dst", dst);
 
-  BufHeadInfo *bh = newBufHeadInfo(src->baddr, src->eaddr, dst->baddr, dst->eaddr);
+//  BufHeadInfo *bh = newBufHeadInfo(src->baddr, src->eaddr, dst->baddr, dst->eaddr);
+  BufHeadInfo *bh = newBufHeadInfo(src, dst);
   printBufHeadInfo(bh);
   if(fwrite(bh, sizeof(BufHeadInfo), 1, fl) < 0) {
     fprintf(stderr, "error write buf head info to files\n");

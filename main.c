@@ -150,6 +150,7 @@ FIN_DETECT: // Finish detecting avalanche
          * Changed the design, no need to build HitMap any more
          */
 
+        /*
         hitMap = buildHitMap(tpm, tpmBufCtxt);   // TODO: flag forward or reverse build
         // print_hitmap_source(hitMap);
 
@@ -183,6 +184,7 @@ FIN_DETECT: // Finish detecting avalanche
         delHitMapBufHitCnt(hitMap);
         delHitMapBufContext(hitMap->hitMapBufCtxt);
         delHitMap(hitMap);
+        */
 
         // searchAllAvalancheInTPM(tpm);
         delTPM(tpm);
