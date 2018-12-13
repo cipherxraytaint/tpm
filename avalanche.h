@@ -92,6 +92,13 @@ void
 searchAllAvalancheInTPM(TPMContext *tpm);
 // Searches avalanche between all pair <in, out> buffer in the tpm
 
+/*
+ * Search buffer pair:<src buf, dst buf> avalanche based on a file.
+ * The file contains all version <src node -> dst node> propagation pairs.
+ */
+void
+search_bufPair_avalanche(TPMContext *tpm, FILE *fl);
+
 // void
 // searchTPMAvalancheFast(TPMContext *tpm);
 // Instead of searching taint propagation as <in, out> pair, searching avalanches of

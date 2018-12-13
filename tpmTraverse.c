@@ -531,7 +531,7 @@ writeBufPair2File(
 //        PropagatePair *pp = newPropagatePair(srcNode->addr, srcNode->val,
 //                                              dstNode->addr, dstNode->val);
         PropagatePair *pp = newPropagatePair(srcNode, dstNode);
-        printPropagatePair(pp);
+//        printPropagatePair(pp);
 
         if(fwrite(pp, sizeof(PropagatePair), 1, fl) < 0) {
           fprintf(stderr, "error write propagate pair to files\n");
@@ -605,7 +605,7 @@ writeBufHeadInfo(
 
 //  BufHeadInfo *bh = newBufHeadInfo(src->baddr, src->eaddr, dst->baddr, dst->eaddr);
   BufHeadInfo *bh = newBufHeadInfo(src, dst);
-  printBufHeadInfo(bh);
+//  printBufHeadInfo(bh);
   if(fwrite(bh, sizeof(BufHeadInfo), 1, fl) < 0) {
     fprintf(stderr, "error write buf head info to files\n");
   }
