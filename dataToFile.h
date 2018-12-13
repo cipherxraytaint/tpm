@@ -42,20 +42,29 @@ typedef struct Data2FileCtxt_{
  * Buf head information
  */
 typedef struct BufHeadInfo_ {
-  u32 srcBufBegin;
-  u32 srcBufEnd;
-  u32 dstBufBegin;
-  u32 dstBufEnd;
+//  u32 srcBufBegin;
+//  u32 srcBufEnd;
+//  u32 dstBufBegin;
+//  u32 dstBufEnd;
+  TPMBufHashTable *srcBuf;
+  TPMBufHashTable *dstBuf;
 } BufHeadInfo;
 
 /*
  * <src version node, dst version node> content write to file
  */
 typedef struct PropagatePair_ {
-  u32 srcAddr;
-  u32 srcVal;
-  u32 dstAddr;
-  u32 dstVal;
+//  u32 srcAddr;
+//  u8  srcSz;
+//  u32 srcVer;
+//  u32 srcVal;
+//  u32 dstAddr;
+//  u8  dstSz;
+//  u32 dstVer;
+//  u32 dstVal;
+  TPMNode2 *src_tr; // src node tpm ptr
+  TPMNode2 *dst_ptr;// dst node tpm ptr
+
 } PropagatePair ;
 
 
@@ -99,20 +108,36 @@ FILE *newFile(u32 srcBufID, u32 dstBufID);
 
 void closeBufPairFile(BufPair2FileHashItem *head);
 
+/*
+ * Read the buf pair propagate info. DEPRECATED.
+ */
+void readBufPairFile(FILE *fl);
+
 BufHeadInfo *newBufHeadInfo(
-    u32 srcBufBegin,
-    u32 srcBufEnd,
-    u32 dstBufBegin,
-    u32 dstBufEnd);
+//    u32 srcBufBegin,
+//    u32 srcBufEnd,
+//    u32 dstBufBegin,
+//    u32 dstBufEnd,
+    TPMBufHashTable *srcBuf,
+    TPMBufHashTable *dstBuf);
 
 void
 delBufHeadInfo(BufHeadInfo *bufHeadInfo);
 
 PropagatePair *
-newPropagatePair(u32 srcAddr, u32 srcVal, u32 dstAddr, u32 dstVal);
+newPropagatePair(
+//    u32 srcAddr,
+//    u32 srcVal,
+//    u32 dstAddr,
+//    u32 dstVal,
+    TPMNode2 *src_ptr,
+    TPMNode2 *dst_ptr);
 
 void
 delPropagatePair(PropagatePair **pp);
+
+void
+printBufHeadInfo(BufHeadInfo *bh);
 
 void
 printPropagatePair(PropagatePair *pp);

@@ -1,8 +1,10 @@
 #include <assert.h>
 #include <stdbool.h>
-#include <stdio.h>
+#include <stdio.h>  // rewind()
 #include "utlist.h"
+
 #include "avalanche.h"
+#include "dataToFile.h"
 #include "misc.h"
 
 static struct ContHitcntRange
@@ -300,6 +302,49 @@ searchAllAvalancheInTPM(TPMContext *tpm)
   //         propaStat.minstep, propaStat.maxstep, propaStat.totalstep / propaStat.numOfSearch);
   // }
   delAllTPMBuf(tpmBufHT);
+}
+
+void
+search_bufPair_avalanche(TPMContext *tpm, FILE *fl)
+{
+  if(tpm == NULL || fl == NULL) {
+    fprintf(stderr, "err: tpm:%p - fl:%p\n", tpm, fl);
+    return;
+  }
+
+  rewind(fl);
+
+  BufHeadInfo *bh = newBufHeadInfo(NULL,NULL);
+  PropagatePair *pp = newPropagatePair(NULL,NULL);
+
+  AvalancheSearchCtxt *avlnch_srch_ctxt;
+  TPMBufHashTable *srcBuf, *dstBuf;
+
+   // Read buf head info
+  if(fread(bh,sizeof(BufHeadInfo),1,fl) > 0)
+  {
+    srcBuf = bh->srcBuf;
+    dstBuf = bh->dstBuf;
+
+//    printBufHeadInfo(bh);
+//    print1TPMBufHashTable("src ", srcBuf);
+//    print1TPMBufHashTable("dst ", dstBuf);
+
+    init_AvalancheSearchCtxt(&avlnch_srch_ctxt, tpm->minBufferSz,
+              srcBuf->headNode, dstBuf->headNode, srcBuf->baddr, srcBuf->eaddr,
+              dstBuf->baddr, dstBuf->eaddr, srcBuf->numOfAddr, dstBuf->numOfAddr);
+
+    int nread = 0;
+    while((nread = fread(pp, sizeof(PropagatePair), 1, fl) ) > 0) {
+//      printPropagatePair(pp);
+    }
+
+    free_AvalancheSearchCtxt(avlnch_srch_ctxt);
+  }
+  else { fprintf(stderr, "error read buf head info from file\n"); }
+
+  delBufHeadInfo(bh);
+  delPropagatePair(&pp);
 }
 
 // void

@@ -95,7 +95,7 @@ FILE *newFile(u32 srcBufID, u32 dstBufID)
   newFileName(fn, srcBufID, dstBufID);
   printf("file name:%s\n", fn);
 
-  FILE *fl = fopen(fn,"wb");
+  FILE *fl = fopen(fn,"w+b");
   assert(fl);
 
   return fl;
@@ -116,20 +116,48 @@ void closeBufPairFile(BufPair2FileHashItem *head)
   printf("close buf pair 2 files\n");
 }
 
+void readBufPairFile(FILE *fl)
+{
+  rewind(fl);
+  BufHeadInfo *bh = newBufHeadInfo(NULL,NULL);
+  PropagatePair *pp = newPropagatePair(NULL,NULL);
+
+  // Read buf head info
+  if(fread(bh,sizeof(BufHeadInfo),1,fl) < 0) {
+    fprintf(stderr, "error read buf head info from file\n");
+    goto EXIT;
+  }
+  printBufHeadInfo(bh);
+
+  // Read <src node, dst node> propagate
+  int nread = 0;
+  while((nread = fread(pp, sizeof(PropagatePair), 1, fl) ) > 0) {
+    printPropagatePair(pp);
+  }
+
+EXIT:
+  delBufHeadInfo(bh);
+  delPropagatePair(&pp);
+}
+
 BufHeadInfo *newBufHeadInfo(
-    u32 srcBufBegin,
-    u32 srcBufEnd,
-    u32 dstBufBegin,
-    u32 dstBufEnd)
+//    u32 srcBufBegin,
+//    u32 srcBufEnd,
+//    u32 dstBufBegin,
+//    u32 dstBufEnd,
+    TPMBufHashTable *srcBuf,
+    TPMBufHashTable *dstBuf)
 {
   BufHeadInfo *bh = calloc(1, sizeof(BufHeadInfo) );
   assert(bh);
 
-  bh->srcBufBegin = srcBufBegin;
-  bh->srcBufEnd = srcBufEnd;
-  bh->dstBufBegin = dstBufBegin;
-  bh->dstBufEnd = dstBufEnd;
+//  bh->srcBufBegin = srcBufBegin;
+//  bh->srcBufEnd = srcBufEnd;
+//  bh->dstBufBegin = dstBufBegin;
+//  bh->dstBufEnd = dstBufEnd;
 
+  bh->srcBuf = srcBuf;
+  bh->dstBuf = dstBuf;
   return bh;
 }
 
@@ -141,15 +169,23 @@ delBufHeadInfo(BufHeadInfo *bufHeadInfo)
 }
 
 PropagatePair *
-newPropagatePair(u32 srcAddr, u32 srcVal, u32 dstAddr, u32 dstVal)
+newPropagatePair(
+//    u32 srcAddr,
+//    u32 srcVal,
+//    u32 dstAddr,
+//    u32 dstVal,
+    TPMNode2 *src_ptr,
+    TPMNode2 *dst_ptr)
 {
   PropagatePair *pp = calloc(1, sizeof(PropagatePair));
   assert(pp != NULL);
 
-  pp->srcAddr   = srcAddr;
-  pp->srcVal    = srcVal;
-  pp->dstAddr   = dstAddr;
-  pp->dstVal    = dstVal;
+//  pp->srcAddr   = srcAddr;
+//  pp->srcVal    = srcVal;
+//  pp->dstAddr   = dstAddr;
+//  pp->dstVal    = dstVal;
+  pp->src_tr = src_ptr;
+  pp->dst_ptr = dst_ptr;
 
   return pp;
 }
@@ -164,11 +200,24 @@ void delPropagatePair(PropagatePair **pp)
 }
 
 void
+printBufHeadInfo(BufHeadInfo *bh)
+{
+  if(bh) {
+//    printf("Buf head: srcBufB:0x%x srcBufE:0x%x - dstBufB:0x%x dstBufE:0x%x\n",
+//            bh->srcBufBegin,bh->srcBufEnd,bh->dstBufBegin,bh->dstBufEnd);
+    printf("Buf head: srcBuf:%p - dstBuf:%p\n",
+            bh->srcBuf,bh->dstBuf);
+  }
+}
+
+void
 printPropagatePair(PropagatePair *pp)
 {
-  if(pp)
-    printf("propagatepair: srcAddr:%u - srcVal:%u - dstAddr:%u - dstVal:%u\n",
-           pp->srcAddr, pp->srcVal, pp->dstAddr, pp->dstVal);
+  if(pp) {
+//    printf("propagatepair: srcAddr:%u - srcVal:%u - dstAddr:%u - dstVal:%u\n",
+//           pp->srcAddr, pp->srcVal, pp->dstAddr, pp->dstVal);
+    printf("propagatepair:srcptr:%p - dstptr:%p\n",pp->src_tr, pp->dst_ptr);
+  }
 }
 
 /* ----- ----- ----- ----- ----- ----- ----- -----

@@ -79,7 +79,7 @@ int main(int argc, char const *argv[])
         if(numValidPair == 0) {
           printf("----------\nnum of buf pair hitcnt > %u bytes:%u, no valid buffer pair, exit \n",
                 64, numValidPair);
-          goto FINDETECT;
+          goto FIN_DETECT;
         }
 
         // Clear TPM transition visit flags
@@ -117,11 +117,29 @@ int main(int argc, char const *argv[])
           tpmTraverse(aryTPMSrcNode[i], octxt);
         }
 
+        // ----- ----- ----- ----- ----- -----
+        // Read propagate info from files to construct 2 level hash table
+        // ----- ----- ----- ----- ----- -----
+
+        // Traverse each file
+        BufPair2FileHashItem *it, *tmp;
+        HASH_ITER(hh_bufPair2FileItem, data2FlCtxt->bufPair2FileHashHead, it, tmp) {
+          BufPair2FileHashItem *sub_it, *subTmp;
+
+          HASH_ITER(hh_bufPair2FileItem, it->subHash, sub_it, subTmp) {
+            if(sub_it->fl) {
+//              printf("read from file\n");
+//              readBufPairFile(sub_it->fl);
+              search_bufPair_avalanche(tpm, sub_it->fl);
+            }
+          }
+        }
+
         closeBufPairFile(data2FlCtxt->bufPair2FileHashHead);
         delBufPair2FileHash(data2FlCtxt->bufPair2FileHashHead);
         delData2FileCtxt(data2FlCtxt);
 
-FINDETECT: // Finish detecting avalanche
+FIN_DETECT: // Finish detecting avalanche
         delBufHitCountAry(&tpmBufHitCountAry);
         delBufHitCountAryCtxt(&tpmBufHitCountAryCtxt);
 
@@ -133,6 +151,7 @@ FINDETECT: // Finish detecting avalanche
          * Changed the design, no need to build HitMap any more
          */
 
+        /*
         hitMap = buildHitMap(tpm, tpmBufCtxt);   // TODO: flag forward or reverse build
         // print_hitmap_source(hitMap);
 
@@ -166,6 +185,7 @@ FINDETECT: // Finish detecting avalanche
         delHitMapBufHitCnt(hitMap);
         delHitMapBufContext(hitMap->hitMapBufCtxt);
         delHitMap(hitMap);
+        */
 
         // searchAllAvalancheInTPM(tpm);
         delTPM(tpm);
