@@ -62,7 +62,7 @@ typedef struct PropagatePair_ {
 //  u8  dstSz;
 //  u32 dstVer;
 //  u32 dstVal;
-  TPMNode2 *src_tr; // src node tpm ptr
+  TPMNode2 *src_ptr; // src node tpm ptr
   TPMNode2 *dst_ptr;// dst node tpm ptr
 
 } PropagatePair ;

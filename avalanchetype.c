@@ -14,6 +14,14 @@ createAddr2NodeItem(u32 addr, TPMNode2 *memNode, Addr2NodeItem *subHash, Tainted
   return i;
 }
 
+Addr2NodeItem *
+findAddr2NodeItem(Addr2NodeItem *head, TPMNode2 *node_ptr)
+{
+  Addr2NodeItem *find = NULL;
+  HASH_FIND(hh_addr2NodeItem, head, &node_ptr, 4, find);
+  return find;
+}
+
 AddrPropgtToNode *
 createAddrPropgtToNode(
     TPMNode2 *srcnode,

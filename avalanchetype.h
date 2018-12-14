@@ -60,6 +60,12 @@ createAddr2NodeItem(
     Addr2NodeItem *subHash,
     TaintedBuf *toMemNode);
 
+/*
+ * Find the Addr2NodeItem if it's in hash table
+ */
+Addr2NodeItem *
+findAddr2NodeItem(Addr2NodeItem *head, TPMNode2 *node_ptr);
+
 /* AddrPropgtToNode */
 AddrPropgtToNode *
 createAddrPropgtToNode(

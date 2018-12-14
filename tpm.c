@@ -553,9 +553,9 @@ print1TPMBufHashTable(char *s, TPMBufHashTable *tpmBufHT)
     return;
 
   TPMBufHashTable *buf = tpmBufHT;
-  printf("%sstart:%-8x end:%-8x sz:%u minseq:%-d maxseq:%-d diffSeq:%-d bufID:%u\n",
+  printf("%sstart:%-8x end:%-8x sz:%u minseq:%-d maxseq:%-d diffSeq:%-d bufID:%u numOfAddr:%u\n",
       s, buf->baddr, buf->eaddr, buf->eaddr - buf->baddr,
-      buf->minseq, buf->maxseq, (buf->maxseq - buf->minseq), buf->headNode->bufid);
+      buf->minseq, buf->maxseq, (buf->maxseq - buf->minseq), buf->headNode->bufid, buf->numOfAddr);
 }
 
 void

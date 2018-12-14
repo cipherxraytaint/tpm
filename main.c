@@ -130,7 +130,7 @@ int main(int argc, char const *argv[])
             if(sub_it->fl) {
 //              printf("read from file\n");
 //              readBufPairFile(sub_it->fl);
-              search_bufPair_avalanche(tpm, sub_it->fl);
+               search_bufPair_avalanche(tpm, sub_it->fl);
             }
           }
         }
