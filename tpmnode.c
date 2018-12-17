@@ -1,5 +1,6 @@
 #include "tpmnode.h"
 #include "flag.h"
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -133,6 +134,23 @@ getMemNode1stVersion(struct TPMNode2 **earliest)
     *earliest = (*earliest)->nextVersion;
   }
   return 0;
+}
+
+u32
+get_node_idx(TPMNode2 *head, TPMNode2 *node)
+{
+  u32 idx = 0;
+
+  if(head != NULL && node != NULL)
+  {
+    assert(head->addr <= node->addr);
+    while(head && head->addr < node->addr) {
+      idx++;
+      head = head->rightNBR;
+    }
+    assert(head->addr == node->addr);
+  }
+  return idx;
 }
 
 bool

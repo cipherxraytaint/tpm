@@ -107,6 +107,14 @@ getMemNodeVersion(struct TPMNode2 *node);
 int 
 getMemNode1stVersion(struct TPMNode2 **earliest);
 
+/*
+ * Return
+ *  addr idx of the node in its belonging buffer
+ *  idx in [0, numOfAddr-1]
+ */
+u32
+get_node_idx(TPMNode2 *head, TPMNode2 *node);
+
 bool
 isTPMMemNode(TPMNode *node);
 

@@ -116,6 +116,9 @@ void closeBufPairFile(BufPair2FileHashItem *head)
   printf("close buf pair 2 files\n");
 }
 
+/*
+ * DEPRECATED.
+ */
 void readBufPairFile(FILE *fl)
 {
   rewind(fl);
@@ -184,7 +187,7 @@ newPropagatePair(
 //  pp->srcVal    = srcVal;
 //  pp->dstAddr   = dstAddr;
 //  pp->dstVal    = dstVal;
-  pp->src_tr = src_ptr;
+  pp->src_ptr = src_ptr;
   pp->dst_ptr = dst_ptr;
 
   return pp;
@@ -216,7 +219,7 @@ printPropagatePair(PropagatePair *pp)
   if(pp) {
 //    printf("propagatepair: srcAddr:%u - srcVal:%u - dstAddr:%u - dstVal:%u\n",
 //           pp->srcAddr, pp->srcVal, pp->dstAddr, pp->dstVal);
-    printf("propagatepair:srcptr:%p - dstptr:%p\n",pp->src_tr, pp->dst_ptr);
+    printf("propagatepair:srcptr:%p - dstptr:%p\n",pp->src_ptr, pp->dst_ptr);
   }
 }
 

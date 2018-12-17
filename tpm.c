@@ -465,9 +465,9 @@ getTPMSrcNode(TPMBufContext *tpmBufCtxt, u32 *numTPMSrcNode)
     }
   }
 
-  printf("Total TPM source nodes:%u\n", *numTPMSrcNode);
+//  printf("Total TPM source nodes:%u\n", *numTPMSrcNode);
 //  for(int i = 0; i < *numTPMSrcNode; i++) {
-//    printMemNodeLit(aryTPMSrcNode[i]);
+//    printMemNodeLit(tpmSrcNode[i]);
 //  }
   return tpmSrcNode;
 }
@@ -553,9 +553,9 @@ print1TPMBufHashTable(char *s, TPMBufHashTable *tpmBufHT)
     return;
 
   TPMBufHashTable *buf = tpmBufHT;
-  printf("%sstart:%-8x end:%-8x sz:%u minseq:%-d maxseq:%-d diffSeq:%-d bufID:%u\n",
+  printf("%sstart:%-8x end:%-8x sz:%u minseq:%-d maxseq:%-d diffSeq:%-d bufID:%u numOfAddr:%u\n",
       s, buf->baddr, buf->eaddr, buf->eaddr - buf->baddr,
-      buf->minseq, buf->maxseq, (buf->maxseq - buf->minseq), buf->headNode->bufid);
+      buf->minseq, buf->maxseq, (buf->maxseq - buf->minseq), buf->headNode->bufid, buf->numOfAddr);
 }
 
 void
@@ -573,12 +573,12 @@ printTPMBufHashTable(TPMBufHashTable *tpmBufHT)
   maxNode = tpmBufHT->totalNode;
 
   HASH_ITER(hh_tpmBufHT, tpmBufHT, buf, temp) {
-    // printf("-----\n");
+//    printf("-----\n");
     printf("begin:0x%-8x end:0x%-8x sz:%-4u numofaddr:%-4u minseq:%-7d maxseq:%-7d diffseq:%-7d bufID:%-4u total nodes:%u\n",
         buf->baddr, buf->eaddr, buf->eaddr - buf->baddr,
         buf->numOfAddr, buf->minseq, buf->maxseq, (buf->maxseq - buf->minseq),
         buf->headNode->bufid, buf->totalNode);
-    // printBufNode(buf->headNode);
+//    printBufNode(buf->headNode);
     if(buf->totalNode < minNode)
       minNode = buf->totalNode;
     if(buf->totalNode > maxNode)

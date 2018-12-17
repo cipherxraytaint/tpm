@@ -62,7 +62,7 @@ typedef struct PropagatePair_ {
 //  u8  dstSz;
 //  u32 dstVer;
 //  u32 dstVal;
-  TPMNode2 *src_tr; // src node tpm ptr
+  TPMNode2 *src_ptr; // src node tpm ptr
   TPMNode2 *dst_ptr;// dst node tpm ptr
 
 } PropagatePair ;
@@ -109,7 +109,8 @@ FILE *newFile(u32 srcBufID, u32 dstBufID);
 void closeBufPairFile(BufPair2FileHashItem *head);
 
 /*
- * Read the buf pair propagate info. DEPRECATED.
+ * DEPRECATED.
+ * Read the buf pair propagate info.
  */
 void readBufPairFile(FILE *fl);
 
