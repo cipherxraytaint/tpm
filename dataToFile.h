@@ -109,7 +109,8 @@ FILE *newFile(u32 srcBufID, u32 dstBufID);
 void closeBufPairFile(BufPair2FileHashItem *head);
 
 /*
- * Read the buf pair propagate info. DEPRECATED.
+ * DEPRECATED.
+ * Read the buf pair propagate info.
  */
 void readBufPairFile(FILE *fl);
 

@@ -116,6 +116,9 @@ void closeBufPairFile(BufPair2FileHashItem *head)
   printf("close buf pair 2 files\n");
 }
 
+/*
+ * DEPRECATED.
+ */
 void readBufPairFile(FILE *fl)
 {
   rewind(fl);

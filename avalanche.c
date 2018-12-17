@@ -362,7 +362,7 @@ search_bufPair_avalanche(TPMContext *tpm, FILE *fl)
         avl_srch_ctxt->dstBuf->bufid);
 
     build_2level_hash(tpm, avl_srch_ctxt,srcBuf, dstBuf, avl_srch_ctxt->numOfSrcAddr, fl);
-    print2LevelHashTable(avl_srch_ctxt->addr2NodeAry, avl_srch_ctxt->numOfSrcAddr);
+//    print2LevelHashTable(avl_srch_ctxt->addr2NodeAry, avl_srch_ctxt->numOfSrcAddr);
 
     free_AvalancheSearchCtxt(avl_srch_ctxt);
   }

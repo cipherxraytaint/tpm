@@ -128,9 +128,7 @@ int main(int argc, char const *argv[])
 
           HASH_ITER(hh_bufPair2FileItem, it->subHash, sub_it, subTmp) {
             if(sub_it->fl) {
-//              printf("read from file\n");
-//              readBufPairFile(sub_it->fl);
-               search_bufPair_avalanche(tpm, sub_it->fl);
+              search_bufPair_avalanche(tpm, sub_it->fl);
             }
           }
         }
